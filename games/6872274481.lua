@@ -2102,6 +2102,8 @@ run(function()
 	local ParticleColor2
 	local ParticleSize
 	local Face
+	local Prediction
+	local PredictionAmount
 	local Animation
 	local AnimationMode
 	local AnimationSpeed
@@ -2114,6 +2116,15 @@ run(function()
 	task.spawn(function()
 		AttackRemote = bedwars.Client:Get(remotes.AttackEntity).instance
 	end)
+
+	local function safeSetupValue(fn, idx, value)
+		if type(debug) ~= 'table' or type(debug.setupvalue) ~= 'function' or type(fn) ~= 'function' then
+			return false
+		end
+
+		local ok, _ = pcall(debug.setupvalue, fn, idx, value)
+		return ok
+	end
 
 	local function getAttackData()
 		if Mouse.Enabled then
@@ -2149,7 +2160,7 @@ run(function()
 					end)
 				end
 
-				if Animation.Enabled and not table.find({'Argon', 'Delta'}, executor) then
+				if Animation.Enabled then
 					local fake = {
 						Controllers = {
 							ViewmodelController = {
@@ -2164,8 +2175,8 @@ run(function()
 							}
 						}
 					}
-					debug.setupvalue(oldSwing or bedwars.SwordController.playSwordEffect, 6, fake)
-					debug.setupvalue(bedwars.ScytheController.playLocalAnimation, 3, fake)
+					safeSetupValue(oldSwing or bedwars.SwordController.playSwordEffect, 6, fake)
+					safeSetupValue(bedwars.ScytheController.playLocalAnimation, 3, fake)
 
 					task.spawn(function()
 						local started = false
@@ -2258,7 +2269,12 @@ run(function()
 
 								local actualRoot = v.Character.PrimaryPart
 								if actualRoot then
-									local dir = CFrame.lookAt(selfpos, actualRoot.Position).LookVector
+									local predictedPos = actualRoot.Position
+									if Prediction.Enabled then
+										local velocity = v.RootPart.AssemblyLinearVelocity or v.RootPart.Velocity
+										predictedPos = predictedPos + velocity * PredictionAmount.Value
+									end
+									local dir = CFrame.lookAt(selfpos, predictedPos).LookVector
 									local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
 									swingCooldown = tick()
 									bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
@@ -2279,7 +2295,7 @@ run(function()
 												cameraPosition = {value = pos},
 												cursorDirection = {value = dir}
 											},
-											targetPosition = {value = actualRoot.Position},
+											targetPosition = {value = predictedPos},
 											selfPosition = {value = pos}
 										}
 									})
@@ -2322,8 +2338,8 @@ run(function()
 						lplr.PlayerGui.MobileUI['2'].Visible = true
 					end)
 				end
-				debug.setupvalue(oldSwing or bedwars.SwordController.playSwordEffect, 6, bedwars.Knit)
-				debug.setupvalue(bedwars.ScytheController.playLocalAnimation, 3, bedwars.Knit)
+				safeSetupValue(oldSwing or bedwars.SwordController.playSwordEffect, 6, bedwars.Knit)
+				safeSetupValue(bedwars.ScytheController.playLocalAnimation, 3, bedwars.Knit)
 				Attacking = false
 				if armC0 then
 					AnimTween = tweenService:Create(gameCamera.Viewmodel.RightHand.RightWrist, TweenInfo.new(AnimationTween.Enabled and 0.001 or 0.3, Enum.EasingStyle.Exponential), {
@@ -2527,6 +2543,23 @@ run(function()
 		Visible = false
 	})
 	Face = Killaura:CreateToggle({Name = 'Face target'})
+	Prediction = Killaura:CreateToggle({
+		Name = 'Prediction',
+		Tooltip = 'Lead targets based on their movement',
+		Function = function(callback)
+			PredictionAmount.Object.Visible = callback
+		end
+	})
+	PredictionAmount = Killaura:CreateSlider({
+		Name = 'Prediction amount',
+		Min = 0,
+		Max = 1,
+		Default = 0.15,
+		Decimal = 100,
+		Darker = true,
+		Visible = false,
+		Suffix = 's'
+	})
 	Animation = Killaura:CreateToggle({
 		Name = 'Custom Animation',
 		Function = function(callback)
