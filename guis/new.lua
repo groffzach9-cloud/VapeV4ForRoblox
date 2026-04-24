@@ -5797,6 +5797,21 @@ mainapi:CreateCategory({
 	Icon = getcustomasset('newvape/assets/new/miniicon.png'),
 	Size = UDim2.fromOffset(19, 12)
 })
+mainapi:CreateCategory({
+    Name = 'Kits',
+    Icon = getcustomasset('newvape/assets/new/miniicon.png'),
+    Size = UDim2.fromOffset(18, 18)
+})
+mainapi:CreateCategory({
+    Name = 'BoostFPS',
+    Icon = getcustomasset('newvape/assets/new/miniicon.png'),
+    Size = UDim2.fromOffset(18, 18)
+})
+mainapi:CreateCategory({
+    Name = 'Legit',
+    Icon = getcustomasset('newvape/assets/new/miniicon.png'),
+    Size = UDim2.fromOffset(18, 18)
+})
 mainapi.Categories.Main:CreateDivider('misc')
 
 --[[
