@@ -49,7 +49,21 @@ local textChatService = cloneref(game:GetService('TextChatService'))
 local contextService = cloneref(game:GetService('ContextActionService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
 
-local isnetworkowner = identifyexecutor and table.find({'AWP', 'Nihon'}, ({identifyexecutor()})[1]) and isnetworkowner or function()
+local function getExecutor()
+	if not identifyexecutor then
+		return nil
+	end
+
+	local executor = identifyexecutor()
+	if type(executor) == 'table' then
+		return executor[1]
+	end
+
+	return executor
+end
+
+local executor = getExecutor()
+local isnetworkowner = executor and table.find({'AWP', 'Nihon'}, executor) and isnetworkowner or function()
 	return true
 end
 local gameCamera = workspace.CurrentCamera or workspace:FindFirstChildWhichIsA('Camera')

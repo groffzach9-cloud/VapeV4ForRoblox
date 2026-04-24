@@ -24,7 +24,21 @@ local guiService = cloneref(game:GetService('GuiService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
 local starterGui = cloneref(game:GetService('StarterGui'))
 
-local isnetworkowner = identifyexecutor and table.find({'AWP', 'Nihon'}, ({identifyexecutor()})[1]) and isnetworkowner or function()
+local function getExecutor()
+	if not identifyexecutor then
+		return nil
+	end
+
+	local executor = identifyexecutor()
+	if type(executor) == 'table' then
+		return executor[1]
+	end
+
+	return executor
+end
+
+local executor = getExecutor()
+local isnetworkowner = executor and table.find({'AWP', 'Nihon'}, executor) and isnetworkowner or function()
 	return true
 end
 local gameCamera = workspace.CurrentCamera
@@ -2113,7 +2127,7 @@ run(function()
 					end)
 				end
 
-				if Animation.Enabled and not (identifyexecutor and table.find({'Argon', 'Delta'}, ({identifyexecutor()})[1])) then
+				if Animation.Enabled and not table.find({'Argon', 'Delta'}, executor) then
 					local fake = {
 						Controllers = {
 							ViewmodelController = {
