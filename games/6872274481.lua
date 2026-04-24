@@ -797,8 +797,17 @@ run(function()
 		return ind and tab[ind + 1] or ''
 	end
 
+	local function safeGetConstants(fn)
+		if type(debug) ~= 'table' or type(debug.getconstants) ~= 'function' or type(fn) ~= 'function' then
+			return {}
+		end
+
+		local ok, result = pcall(debug.getconstants, fn)
+		return ok and type(result) == 'table' and result or {}
+	end
+
 	for i, v in remoteNames do
-		local remote = dumpRemote(debug.getconstants(v))
+		local remote = dumpRemote(safeGetConstants(v))
 		if remote == '' then
 			notif('Vape', 'Failed to grab remote ('..i..')', 10, 'alert')
 		end
@@ -5221,13 +5230,21 @@ run(function()
 					v:Disconnect()
 				end
 	
+				local function safeGetConstants(fn)
+					if type(debug) ~= 'table' or type(debug.getconstants) ~= 'function' or type(fn) ~= 'function' then
+						return {}
+					end
+
+					local ok, result = pcall(debug.getconstants, fn)
+					return ok and type(result) == 'table' and result or {}
+				end
+
 				for _, v in getconnections(runService.Heartbeat) do
-					if type(v.Function) == 'function' and table.find(debug.getconstants(v.Function), remotes.AfkStatus) then
+					if type(v.Function) == 'function' and table.find(safeGetConstants(v.Function), remotes.AfkStatus) then
 						v:Disconnect()
 					end
 				end
-	
-				bedwars.Client:Get(remotes.AfkStatus):SendToServer({
+bedwars.Client:Get(remotes.AfkStatus):SendToServer({
 					afk = false
 				})
 			end
