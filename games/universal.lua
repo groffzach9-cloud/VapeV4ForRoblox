@@ -50,11 +50,15 @@ local contextService = cloneref(game:GetService('ContextActionService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
 
 local function getExecutor()
-	if not identifyexecutor then
+	if type(identifyexecutor) ~= 'function' then
 		return nil
 	end
 
-	local executor = identifyexecutor()
+	local ok, executor = pcall(identifyexecutor)
+	if not ok then
+		return nil
+	end
+
 	if type(executor) == 'table' then
 		return executor[1]
 	end

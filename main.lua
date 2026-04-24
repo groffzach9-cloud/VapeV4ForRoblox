@@ -3,11 +3,15 @@ if shared.vape then shared.vape:Uninject() end
 
 -- why do exploits fail to implement anything correctly? Is it really that hard?
 local function getExecutor()
-	if not identifyexecutor then
+	if type(identifyexecutor) ~= 'function' then
 		return nil
 	end
 
-	local executor = identifyexecutor()
+	local ok, executor = pcall(identifyexecutor)
+	if not ok then
+		return nil
+	end
+
 	if type(executor) == 'table' then
 		return executor[1]
 	end
@@ -17,7 +21,11 @@ end
 
 local executor = getExecutor()
 if executor == 'Argon' or executor == 'Wave' or executor == 'Delta' then
-	getgenv().setthreadidentity = nil
+	if type(getgenv) == 'function' then
+		getgenv().setthreadidentity = nil
+	elseif type(_G) == 'table' then
+		_G.setthreadidentity = nil
+	end
 end
 
 local vape
