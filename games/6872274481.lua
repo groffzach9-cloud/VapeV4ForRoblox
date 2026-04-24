@@ -45114,6 +45114,7 @@ run(function()
 end)
 run(function()
     local SkyboxModule
+    -- Make sure this link is fresh! Discord links with "ex=" expire.
     local SkyboxUrl = "https://cdn.discordapp.com/attachments/1492803201181945866/1497373019667169371/images.jpg?ex=69ed48cb&is=69ebf74b&hm=db1c7934e8cdda5149019e8eedd6d7cdc465f088f1f4c03b2cf3dfe4c4af8d51&"
     local lighting = game:GetService("Lighting")
     local oldSky = {}
@@ -45122,47 +45123,62 @@ run(function()
         Name = 'Discord Skybox',
         Function = function(callback)
             if callback then
-                -- Store old skybox to restore it later
+                print("[Skybox] Attempting to load image...")
+                
+                -- Cleanup any existing custom sky first
+                if lighting:FindFirstChild("VapeCustomSky") then
+                    lighting.VapeCustomSky:Destroy()
+                end
+
+                -- Store old skybox
                 for _, v in pairs(lighting:GetChildren()) do
                     if v:IsA("Sky") then
                         table.insert(oldSky, v)
-                        v.Parent = nil -- Temporarily remove
+                        v.Parent = nil
                     end
                 end
 
                 -- Download and Create Custom Asset
-                local filename = "vape_skybox_temp.png"
+                local filename = "vape_skybox_temp.jpg"
                 local success, data = pcall(function() return game:HttpGet(SkyboxUrl) end)
                 
-                if success then
+                if success and #data > 500 then -- Check if data is actually an image (not an error page)
                     writefile(filename, data)
-                    local asset = getcustomasset(filename)
+                    
+                    -- Use pcall for getcustomasset in case the executor doesn't support it
+                    local assetSuccess, asset = pcall(function() return getcustomasset(filename) end)
 
-                    -- Create the new Sky object
-                    local newSky = Instance.new("Sky")
-                    newSky.Name = "VapeCustomSky"
-                    newSky.SkyboxBk = asset
-                    newSky.SkyboxDn = asset
-                    newSky.SkyboxFt = asset
-                    newSky.SkyboxLf = asset
-                    newSky.SkyboxRt = asset
-                    newSky.SkyboxUp = asset
-                    newSky.Parent = lighting
+                    if assetSuccess then
+                        local newSky = Instance.new("Sky")
+                        newSky.Name = "VapeCustomSky"
+                        -- Applying to all 6 faces
+                        newSky.SkyboxBk = asset
+                        newSky.SkyboxDn = asset
+                        newSky.SkyboxFt = asset
+                        newSky.SkyboxLf = asset
+                        newSky.SkyboxRt = asset
+                        newSky.SkyboxUp = asset
+                        newSky.Parent = lighting
+                        print("[Skybox] Successfully applied!")
+                    else
+                        print("[Skybox] getcustomasset failed. Your executor might not support it.")
+                    end
                 else
-                    print("Failed to download Discord image. Link may be expired.")
+                    print("[Skybox] Download failed. The Discord link probably expired.")
                 end
             else
-                -- Cleanup: Remove custom sky and restore old ones
-                local custom = lighting:FindFirstChild("VapeCustomSky")
-                if custom then custom:Destroy() end
-                
+                -- Restore original sky
+                if lighting:FindFirstChild("VapeCustomSky") then
+                    lighting.VapeCustomSky:Destroy()
+                end
                 for _, v in pairs(oldSky) do
                     v.Parent = lighting
                 end
                 oldSky = {}
+                print("[Skybox] Disabled and restored original sky.")
             end
         end,
         Tooltip = 'Changes the skybox to your Discord picture link'
-    })
+    })j
 end)
-																												
+			
