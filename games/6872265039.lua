@@ -56,7 +56,7 @@ end)
 
 for _, v in vape.Modules do
 	if v.Category == 'Combat' or v.Category == 'Minigames' then
-		vape:Remove(i)
+		vape:Remove(v)
 	end
 end
 
