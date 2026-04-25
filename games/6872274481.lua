@@ -45016,3 +45016,245 @@ run(function()
         end
     end))
 end)
+run(function()
+	local Backtrack
+	local BacktrackMaxTime, BacktrackAimMode
+	local BacktrackOverrideShots, BacktrackPrediction
+	
+	local backtrackMaxTimeValue = 200
+	local backtrackAimModeValue = 'Crosshair'
+	local backtrackOverrideValue = true
+	local backtrackPredictionValue = false
+	
+	local history = {}
+	local visuals = {}
+	local lines = {}
+	local folder = nil
+	
+	Backtrack = vape.Categories.Blatant:CreateModule({
+		Name = 'Backtrack',
+		Function = function(callback)
+			if callback then
+				history = {}
+				visuals = {}
+				lines = {}
+				folder = Instance.new('Folder')
+				folder.Name = 'BacktrackVisuals'
+				folder.Parent = vape.gui
+				
+				local function clearVisuals()
+					for _, v in ipairs(lines) do
+						pcall(function()
+							v.Visible = false
+							v:Remove()
+						end)
+					end
+					for _, v in ipairs(visuals) do
+						pcall(function() v:Destroy() end)
+					end
+					table.clear(lines)
+					table.clear(visuals)
+				end
+				
+				-- Record positions
+				Backtrack:Clean(runService.Heartbeat:Connect(function()
+					local now = tick()
+					local maxTime = backtrackMaxTimeValue / 1000
+					
+					for _, ent in ipairs(entitylib.List) do
+						if ent.Targetable and ent.Character and ent.RootPart then
+							history[ent.Player] = history[ent.Player] or {}
+							local hist = history[ent.Player]
+							
+							local headPart = ent.Character:FindFirstChild('Head')
+							
+							table.insert(hist, {
+								Tick = now,
+								CFrame = ent.RootPart.CFrame,
+								Velocity = ent.RootPart.Velocity,
+								Head = headPart
+							})
+							
+							-- Prune old records
+							while #hist > 0 and (now - hist[1].Tick) > (maxTime + 0.5) do
+								table.remove(hist, 1)
+							end
+							
+							while #hist > 40 do
+								table.remove(hist, 1)
+							end
+						end
+					end
+				end))
+				
+				-- Visualize
+				Backtrack:Clean(runService.RenderStepped:Connect(function()
+					clearVisuals()
+					local now = tick()
+					local maxTime = backtrackMaxTimeValue / 1000
+					
+					for _, ent in ipairs(entitylib.List) do
+						if ent.Targetable and history[ent.Player] then
+							local hist = history[ent.Player]
+							local drawn = 0
+							
+							for i = #hist, 1, -3 do
+								if drawn >= 5 then break end
+								local record = hist[i]
+								if (now - record.Tick) <= maxTime then
+									local pos, vis = gameCamera:WorldToViewportPoint(record.CFrame.Position)
+									if vis then
+										local headPos = record.Head and record.Head.Position or record.CFrame.Position + Vector3.new(0, 2.5, 0)
+										local headVis, headOnScreen = gameCamera:WorldToViewportPoint(headPos)
+										
+										if headOnScreen then
+											local line = Drawing.new('Line')
+											line.Thickness = 1.5
+											line.Color = Color3.fromRGB(0, 255, 100)
+											line.Transparency = 0.7
+											line.From = Vector2.new(pos.X, pos.Y)
+											line.To = Vector2.new(headVis.X, headVis.Y)
+											line.Visible = true
+											table.insert(lines, line)
+										end
+										
+										local ghostPart = Instance.new('Part')
+										ghostPart.Size = record.RootPart and record.RootPart.Size or Vector3.new(2, 5, 2)
+										ghostPart.CFrame = record.CFrame
+										ghostPart.Anchored = true
+										ghostPart.CanCollide = false
+										ghostPart.Transparency = 1
+										ghostPart.Parent = folder
+										
+										local box = Instance.new('BoxHandleAdornment')
+										box.Adornee = ghostPart
+										box.Color3 = Color3.fromRGB(0, 255, 100)
+										box.Transparency = 0.5
+										box.AlwaysOnTop = true
+										box.Size = ghostPart.Size + Vector3.new(0.2, 0.2, 0.2)
+										box.Parent = folder
+										
+										table.insert(visuals, ghostPart)
+										table.insert(visuals, box)
+										drawn = drawn + 1
+									end
+								end
+							end
+						end
+					end
+				end))
+				
+				-- Hook Shoot remote
+				if ShootRemote and backtrackOverrideValue then
+					local oldFireServer = ShootRemote.FireServer
+					ShootRemote.FireServer = function(self, ...)
+						if self == ShootRemote and Backtrack.Enabled then
+							local args = {...}
+							if type(args[2]) == 'Vector3' then
+								local bestTick = nil
+								local bestScore = math.huge
+								local now = tick()
+								local mouseLocation = inputService:GetMouseLocation()
+								
+								for _, ent in ipairs(entitylib.List) do
+									if ent.Targetable and history[ent.Player] then
+										local hist = history[ent.Player]
+										for i = #hist, 1, -1 do
+											local record = hist[i]
+											if (now - record.Tick) > (backtrackMaxTimeValue / 1000) then
+												break
+											end
+											
+											local targetPos = record.CFrame.Position + Vector3.new(0, 2.5, 0)
+											local screenPos, onScreen = gameCamera:WorldToViewportPoint(targetPos)
+											
+											if onScreen then
+												local dist = (Vector2.new(screenPos.X, screenPos.Y) - mouseLocation).Magnitude
+												if backtrackAimModeValue == 'Crosshair' then
+													if dist < bestScore then
+														bestScore = dist
+														bestTick = record
+													end
+												else
+													local score = dist + (now - record.Tick) * 50
+													if score < bestScore then
+														bestScore = score
+														bestTick = record
+													end
+												end
+											end
+										end
+									end
+								end
+								
+								if bestTick then
+									local oldPos = bestTick.CFrame.Position
+									if backtrackPredictionValue then
+										local timeSince = now - bestTick.Tick
+										oldPos = oldPos + bestTick.Velocity * timeSince
+									end
+									args[2] = oldPos + Vector3.new(0, 2.5, 0)
+								end
+							end
+							return oldFireServer(self, unpack(args))
+						end
+						return oldFireServer(self, ...)
+					end
+				end
+			else
+				-- Cleanup
+				for _, v in ipairs(lines) do
+					pcall(function()
+						v.Visible = false
+						v:Remove()
+					end)
+				end
+				for _, v in ipairs(visuals) do
+					pcall(function() v:Destroy() end)
+				end
+				if folder then
+					folder:Destroy()
+				end
+				history = {}
+				visuals = {}
+				lines = {}
+			end
+		end,
+		Tooltip = 'Records player positions for lag compensation'
+	})
+	
+	BacktrackMaxTime = Backtrack:CreateSlider({
+		Name = 'Max Time',
+		Min = 100,
+		Max = 1000,
+		Default = 200,
+		Suffix = 'ms',
+		Function = function(val)
+			backtrackMaxTimeValue = val
+		end
+	})
+	
+	BacktrackAimMode = Backtrack:CreateDropdown({
+		Name = 'Aim Mode',
+		List = {'Crosshair', 'Damage'},
+		Function = function(val)
+			backtrackAimModeValue = val
+		end
+	})
+	
+	BacktrackOverrideShots = Backtrack:CreateToggle({
+		Name = 'Override Shots',
+		Default = true,
+		Function = function(callback)
+			backtrackOverrideValue = callback
+		end
+	})
+	
+	BacktrackPrediction = Backtrack:CreateToggle({
+		Name = 'Prediction',
+		Default = false,
+		Function = function(callback)
+			backtrackPredictionValue = callback
+		end
+	})
+end)
