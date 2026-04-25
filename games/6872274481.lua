@@ -8527,7 +8527,7 @@ run(function()
 	local desyncVelDesyncValue = false
 	local desyncVelStrengthValue = 10
 	
-	Desync = vape.Categories.Blatant:CreateModule({
+	Desync = vape.Categories.Utility:CreateModule({
 		Name = 'Desync',
 		Function = function(callback)
 			if callback then
