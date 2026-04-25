@@ -45112,3 +45112,63 @@ run(function()
 		end
 	})
 end)
+run(function()
+    local SkyboxModule
+    -- Your specific Discord Link
+    local imageUrl = "https://cdn.discordapp.com/attachments/1492803201181945866/1497373019667169371/images.jpg?ex=69ed48cb&is=69ebf74b&hm=db1c7934e8cdda5149019e8eedd6d7cdc465f088f1f4c03b2cf3dfe4c4af8d51&"
+    local filename = "temp_skybox_image.png"
+    local lighting = game:GetService("Lighting")
+    local oldSkies = {}
+
+    SkyboxModule = vape.Categories.Render:CreateModule({
+        Name = 'Discord Skybox',
+        Function = function(callback)
+            if callback then
+                -- 1. Store and hide the original map skyboxes
+                for _, v in pairs(lighting:GetChildren()) do
+                    if v:IsA("Sky") then
+                        table.insert(oldSkies, v)
+                        v.Parent = nil
+                    end
+                end
+
+                -- 2. Download the Discord Image
+                local success, result = pcall(function()
+                    return game:HttpGet(imageUrl)
+                end)
+                
+                if success then
+                    writefile(filename, result)
+                    local customAsset = getcustomasset(filename)
+
+                    -- 3. Create the custom Sky object
+                    local sky = Instance.new("Sky")
+                    sky.Name = "VapeSkybox"
+                    sky.SkyboxBk = customAsset
+                    sky.SkyboxDn = customAsset
+                    sky.SkyboxFt = customAsset
+                    sky.SkyboxLf = customAsset
+                    sky.SkyboxRt = customAsset
+                    sky.SkyboxUp = customAsset
+                    sky.Parent = lighting
+                    print("Skybox loaded successfully!")
+                else
+                    warn("Download failed! Discord link might be expired.")
+                    -- Auto-toggle off if it fails
+                    SkyboxModule:ToggleButton(false)
+                end
+            else
+                -- 4. Cleanup: Remove custom and restore old ones
+                local custom = lighting:FindFirstChild("VapeSkybox")
+                if custom then custom:Destroy() end
+                
+                for _, v in pairs(oldSkies) do
+                    v.Parent = lighting
+                end
+                oldSkies = {}
+            end
+        end,
+        Tooltip = 'Uses a Discord link to set your skybox'
+    })
+end)
+																										
