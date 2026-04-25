@@ -503,12 +503,17 @@ run(function()
 				humrootpart = waitForChildOfType(char, 'PrimaryPart', 10, true)
 				head = humrootpart
 			end
-			local updateobjects = plr and plr ~= lplr and {
-				char:WaitForChild('ArmorInvItem_0', 5),
-				char:WaitForChild('ArmorInvItem_1', 5),
-				char:WaitForChild('ArmorInvItem_2', 5),
-				char:WaitForChild('HandInvItem', 5)
-			} or {}
+			local updateobjects = {}
+			if plr and plr ~= lplr then
+				local armor0 = char:WaitForChild('ArmorInvItem_0', 5)
+				if armor0 then table.insert(updateobjects, armor0) end
+				local armor1 = char:WaitForChild('ArmorInvItem_1', 5)
+				if armor1 then table.insert(updateobjects, armor1) end
+				local armor2 = char:WaitForChild('ArmorInvItem_2', 5)
+				if armor2 then table.insert(updateobjects, armor2) end
+				local hand = char:WaitForChild('HandInvItem', 5)
+				if hand then table.insert(updateobjects, hand) end
+			end
 
 			if hum and humrootpart then
 				local entity = {
