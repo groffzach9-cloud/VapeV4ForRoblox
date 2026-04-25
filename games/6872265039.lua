@@ -102,14 +102,18 @@ run(function()
 				end))
 	
 				repeat
-					if not bedwars.CrateAltarController.activeCrates[1] then
-						for _, v in bedwars.Store:getState().Consumable.inventory do
-							if v.consumable:find('crate') then
+					local activeCrates = bedwars.CrateAltarController.activeCrates
+					if not (activeCrates and type(activeCrates[1]) == 'table' and activeCrates[1][2]) then
+						local state = bedwars.Store:getState()
+						local inventory = state and state.Consumable and state.Consumable.inventory or {}
+						for _, v in inventory do
+							if type(v) == 'table' and type(v.consumable) == 'string' and v.consumable:find('crate') then
 								bedwars.CrateAltarController:pickCrate(v.consumable, 1)
 								task.wait(1.2)
-								if bedwars.CrateAltarController.activeCrates[1] and bedwars.CrateAltarController.activeCrates[1][2] then
+								activeCrates = bedwars.CrateAltarController.activeCrates
+								if activeCrates and type(activeCrates[1]) == 'table' and activeCrates[1][2] then
 									bedwars.Client:GetNamespace('RewardCrate'):Get('OpenRewardCrate'):SendToServer({
-										crateId = bedwars.CrateAltarController.activeCrates[1][2].attributes.crateId
+										crateId = activeCrates[1][2].attributes.crateId
 									})
 								end
 								break
