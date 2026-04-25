@@ -45113,59 +45113,78 @@ run(function()
 	})
 end)
 local StarterGui = game:GetService("StarterGui")
-local CoreGui = game:GetService("CoreGui") 
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
 
+-- Configuration
 local Toggled = false
+local PACKET_ID = 0x1B -- Common position/timestamp packet
 
+-- Notification Function
 local function notify(title, text)
     pcall(function()
         StarterGui:SetCore("SendNotification", {
-            Title = title;
-            Text = text;
-            Duration = 2;
+            Title = title,
+            Text = text,
+            Duration = 2,
         })
     end)
 end
 
+-- Fixed Hook Logic
 local function rakhook(packet)
-    if packet.PacketId == 0x1B then
+    if Toggled and packet.PacketId == PACKET_ID then
         local data = packet.AsBuffer
-        buffer.writeu32(data, 1, 0xFFFFFFFF)
-        packet:SetData(data)
+        -- We write a massive value to the timestamp/sequence field to "desync"
+        -- 0x01 offset is standard for the first data field after PacketID
+        pcall(function()
+            buffer.writeu32(data, 1, 0xFFFFFFFF)
+            packet:SetData(data)
+        end)
     end
 end
 
+-- UI Creation
 local ScreenGui = Instance.new("ScreenGui")
-local ToggleButton = Instance.new("TextButton")
-
-ScreenGui.Name = "DesyncGui"
+ScreenGui.Name = "Kwadawear_Desync"
 ScreenGui.Parent = CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "ToggleButton"
 ToggleButton.Parent = ScreenGui
-ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ToggleButton.AnchorPoint = Vector2.new(1, 1)
-ToggleButton.Position = UDim2.new(1, 0, 1, 0) 
-ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.Text = "Desync: OFF"
+ToggleButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+ToggleButton.Position = UDim2.new(0.85, 0, 0.9, 0) -- Adjusted for better visibility
+ToggleButton.Size = UDim2.new(0, 120, 0, 40)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "DESYNC: OFF"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 14
-ToggleButton.Draggable = false
 
+-- Round Corners for "Kwadawear" aesthetic
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = ToggleButton
+
+-- Logic for Hooking
 ToggleButton.MouseButton1Click:Connect(function()
     Toggled = not Toggled
     
     if Toggled then
-        notify("Desync", "ENABLED")
-        raknet.add_send_hook(rakhook)
-        ToggleButton.Text = "Desync: ON"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0) 
+        if raknet then
+            raknet.add_send_hook(rakhook)
+            notify("Kwadawear", "Desync Hook Applied")
+            ToggleButton.Text = "DESYNC: ON"
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        else
+            notify("Error", "Executor does not support RakNet")
+            Toggled = false
+        end
     else
-        notify("Desync", "DISABLED")
-        raknet.remove_send_hook(rakhook)
-        ToggleButton.Text = "Desync: OFF"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0) 
+        if raknet then
+            raknet.remove_send_hook(rakhook)
+        end
+        notify("Kwadawear", "Desync Hook Removed")
+        ToggleButton.Text = "DESYNC: OFF"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
     end
 end)
