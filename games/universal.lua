@@ -278,18 +278,22 @@ local SpeedMethodList = {'Velocity'}
 SpeedMethods = {
 	Velocity = function(options, moveDirection)
 		local root = entitylib.character.RootPart
-		root.AssemblyLinearVelocity = (moveDirection * options.Value.Value) + Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
+		local speed = math.clamp(options.Value.Value, 0, 150)
+		root.AssemblyLinearVelocity = (moveDirection * speed) + Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
 	end,
 	Impulse = function(options, moveDirection)
 		local root = entitylib.character.RootPart
-		local diff = ((moveDirection * options.Value.Value) - root.AssemblyLinearVelocity) * Vector3.new(1, 0, 1)
+		local speed = math.clamp(options.Value.Value, 0, 150)
+		local diff = ((moveDirection * speed) - root.AssemblyLinearVelocity) * Vector3.new(1, 0, 1)
 		if diff.Magnitude > (moveDirection == Vector3.zero and 10 or 2) then
 			root:ApplyImpulse(diff * root.AssemblyMass)
 		end
 	end,
 	CFrame = function(options, moveDirection, dt)
 		local root = entitylib.character.RootPart
-		local dest = (moveDirection * math.max(options.Value.Value - entitylib.character.Humanoid.WalkSpeed, 0) * dt)
+		local speed = math.clamp(options.Value.Value, 0, 150)
+		local dest = (moveDirection * math.max(speed - entitylib.character.Humanoid.WalkSpeed, 0) * dt)
+		if dest.Magnitude > 100 then dest = dest.Unit * 100 end
 		if options.WallCheck.Enabled then
 			options.rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
 			options.rayCheck.CollisionGroup = root.CollisionGroup
@@ -303,16 +307,29 @@ SpeedMethods = {
 	TP = function(options, moveDirection)
 		if options.TPTiming < tick() then
 			options.TPTiming = tick() + options.TPFrequency.Value
-			SpeedMethods.CFrame(options, moveDirection, 1)
+			local speed = math.clamp(options.Value.Value, 0, 150)
+			local dest = (moveDirection * math.max(speed - entitylib.character.Humanoid.WalkSpeed, 0) * 1)
+			if dest.Magnitude > 100 then dest = dest.Unit * 100 end
+			if options.WallCheck.Enabled then
+				options.rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
+				options.rayCheck.CollisionGroup = entitylib.character.RootPart.CollisionGroup
+				local ray = workspace:Raycast(entitylib.character.RootPart.Position, dest, options.rayCheck)
+				if ray then
+					dest = ((ray.Position + ray.Normal) - entitylib.character.RootPart.Position)
+				end
+			end
+			entitylib.character.RootPart.CFrame += dest
 		end
 	end,
 	WalkSpeed = function(options)
 		if not options.WalkSpeed then options.WalkSpeed = entitylib.character.Humanoid.WalkSpeed end
-		entitylib.character.Humanoid.WalkSpeed = options.Value.Value
+		local speed = math.clamp(options.Value.Value, 0, 150)
+		entitylib.character.Humanoid.WalkSpeed = speed
 	end,
 	Pulse = function(options, moveDirection)
 		local root = entitylib.character.RootPart
-		local dt = math.max(options.Value.Value - entitylib.character.Humanoid.WalkSpeed, 0)
+		local speed = math.clamp(options.Value.Value, 0, 150)
+		local dt = math.max(speed - entitylib.character.Humanoid.WalkSpeed, 0)
 		dt = dt * (1 - math.min((tick() % (options.PulseLength.Value + options.PulseDelay.Value)) / options.PulseLength.Value, 1))
 		root.AssemblyLinearVelocity = (moveDirection * (entitylib.character.Humanoid.WalkSpeed + dt)) + Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
 	end
