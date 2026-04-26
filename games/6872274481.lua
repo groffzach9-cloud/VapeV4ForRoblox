@@ -2512,6 +2512,10 @@ run(function()
 		Players = true,
 		NPCs = true
 	})
+	local Mode = Killaura:CreateDropdown({
+		Name = 'Mode',
+		List = {'Normal', 'Aero'}
+	})
 	local methods = {'Damage', 'Distance'}
 	for i in sortmethods do
 		if not table.find(methods, i) then
