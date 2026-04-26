@@ -9367,7 +9367,7 @@ run(function()
         local MIN_HOLD_TIME = 0.12
         local ActivationScheduled = nil
 
-        AutoClicker = vape.Categories.Combat:CreateModule({
+        AutoClicker = vape.Categories.Utility:CreateModule({
             Name = 'AutoClicker',
             Function = function(callback)
                 if callback then
