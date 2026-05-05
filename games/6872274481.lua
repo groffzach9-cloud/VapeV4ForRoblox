@@ -34029,24 +34029,3 @@ run(function()
 		end
 	})
 end)
-run(function()
-	local ItemlessLongjump = {Enabled = false}
-
-	ItemlessLongjump = vape.Categories.Blatent:CreateModule({
-		Name = "ItemlessLongjump",
-		Function = function(callback)
-			ItemlessLongjump.Enabled = callback
-			if callback then
-				lplr.Character.HumanoidRootPart.Velocity = lplr.Character.HumanoidRootPart.Velocity + Vector3.new(0, 100, 0)
-				task.wait(0.3)
-				for i = 1, 4 do
-					task.wait(0.4)
-					lplr.Character.HumanoidRootPart.Velocity = lplr.Character.HumanoidRootPart.Velocity + Vector3.new(0, 75, 0)
-				end
-			else
-				workspace.Gravity = 192.6
-			end
-		end,
-		Tooltip = "Lets you do a longjump without any items/kits"
-	})
-end)
