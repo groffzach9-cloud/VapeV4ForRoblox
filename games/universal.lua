@@ -6459,7 +6459,85 @@ run(function()
 	local Freecam
 	local Value
 	local randomkey, module, old = httpService:GenerateGUID(false)
-	
+	local mobileFreecamGui
+	local mobileForward, mobileSide, mobileUp = 0, 0, 0
+
+	local function cleanupFreecamMobile()
+		if mobileFreecamGui then
+			mobileFreecamGui:Destroy()
+			mobileFreecamGui = nil
+		end
+		mobileForward, mobileSide, mobileUp = 0, 0, 0
+	end
+
+	local function createFreecamMobileButton(name, position, icon)
+		local button = Instance.new('TextButton')
+		button.Name = name
+		button.Size = UDim2.new(0, 60, 0, 60)
+		button.Position = position
+		button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		button.BackgroundTransparency = 0.4
+		button.BorderSizePixel = 0
+		button.Text = icon
+		button.TextColor3 = Color3.fromRGB(255, 255, 255)
+		button.TextScaled = true
+		button.Font = Enum.Font.Gotham
+		local corner = Instance.new('UICorner')
+		corner.CornerRadius = UDim.new(0, 12)
+		corner.Parent = button
+		return button
+	end
+
+	local function createMobileControlGui()
+		cleanupFreecamMobile()
+		mobileFreecamGui = Instance.new('ScreenGui')
+		mobileFreecamGui.Name = 'FreecamMobileControls'
+		mobileFreecamGui.ResetOnSpawn = false
+		mobileFreecamGui.Parent = lplr.PlayerGui
+
+		local forwardBtn = createFreecamMobileButton('FreecamForward', UDim2.new(0.12, 0, 0.68, 0), 'W')
+		local backBtn = createFreecamMobileButton('FreecamBack', UDim2.new(0.12, 0, 0.86, 0), 'S')
+		local leftBtn = createFreecamMobileButton('FreecamLeft', UDim2.new(0.02, 0, 0.77, 0), 'A')
+		local rightBtn = createFreecamMobileButton('FreecamRight', UDim2.new(0.22, 0, 0.77, 0), 'D')
+		local upBtn = createFreecamMobileButton('FreecamUp', UDim2.new(0.82, 0, 0.72, 0), '↑')
+		local downBtn = createFreecamMobileButton('FreecamDown', UDim2.new(0.82, 0, 0.82, 0), '↓')
+
+		forwardBtn.Parent = mobileFreecamGui
+		backBtn.Parent = mobileFreecamGui
+		leftBtn.Parent = mobileFreecamGui
+		rightBtn.Parent = mobileFreecamGui
+		upBtn.Parent = mobileFreecamGui
+		downBtn.Parent = mobileFreecamGui
+
+		local function bindButton(button, axis, value)
+			Freecam:Clean(button.MouseButton1Down:Connect(function()
+				if axis == 'forward' then
+					mobileForward = value
+				elseif axis == 'side' then
+					mobileSide = value
+				else
+					mobileUp = value
+				end
+			end))
+			Freecam:Clean(button.MouseButton1Up:Connect(function()
+				if axis == 'forward' and mobileForward == value then
+					mobileForward = 0
+				elseif axis == 'side' and mobileSide == value then
+					mobileSide = 0
+				elseif axis == 'up' and mobileUp == value then
+					mobileUp = 0
+				end
+			end))
+		end
+
+		bindButton(forwardBtn, 'forward', -1)
+		bindButton(backBtn, 'forward', 1)
+		bindButton(leftBtn, 'side', -1)
+		bindButton(rightBtn, 'side', 1)
+		bindButton(upBtn, 'up', 1)
+		bindButton(downBtn, 'up', -1)
+	end
+
 	Freecam = vape.Categories.World:CreateModule({
 		Name = 'Freecam',
 		Function = function(callback)
@@ -6480,16 +6558,23 @@ run(function()
 						return camPos
 					end
 	
+					if inputService.TouchEnabled then
+						createMobileControlGui()
+					end
+
 					Freecam:Clean(runService.PreSimulation:Connect(function(dt)
 						if not inputService:GetFocusedTextBox() then
-							local forward = (inputService:IsKeyDown(Enum.KeyCode.W) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
-							local side = (inputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0)
-							local up = (inputService:IsKeyDown(Enum.KeyCode.Q) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.E) and 1 or 0)
+							local forward = (inputService:IsKeyDown(Enum.KeyCode.W) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0) + mobileForward
+							local side = (inputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) + mobileSide
+							local up = (inputService:IsKeyDown(Enum.KeyCode.Q) and -1 or 0) + (inputService:IsKeyDown(Enum.KeyCode.E) and 1 or 0) + mobileUp
+							forward = math.clamp(forward, -1, 1)
+							side = math.clamp(side, -1, 1)
+							up = math.clamp(up, -1, 1)
 							dt = dt * (inputService:IsKeyDown(Enum.KeyCode.LeftShift) and 0.25 or 1)
 							camPos = (CFrame.lookAlong(camPos, gameCamera.CFrame.LookVector) * CFrame.new(Vector3.new(side, up, forward) * (Value.Value * dt))).Position
 						end
 					end))
-	
+
 					contextService:BindActionAtPriority('FreecamKeyboard'..randomkey, function()
 						return Enum.ContextActionResult.Sink
 					end, false, Enum.ContextActionPriority.High.Value,
@@ -6504,6 +6589,7 @@ run(function()
 					)
 				end
 			else
+				cleanupFreecamMobile()
 				pcall(function()
 					contextService:UnbindAction('FreecamKeyboard'..randomkey)
 				end)
