@@ -34577,3 +34577,385 @@ run(function()
 		List = {'Waifu1', 'Waifu2'}
 	})
 end)
+run(function()
+	local LagbackNotifier
+	
+	LagbackNotifier = vape.Categories.Utility:CreateModule({
+        Name = 'LagbackNotifier',
+        Function = function(enabled)
+            if enabled then
+                local lastnetowner = true
+                LagbackNotifier:Clean(lplr:GetAttributeChangedSignal('LastTeleported'):Connect(function()
+                    vape:CreateNotification('LagbackNotifier', 'Teleport detected', 3)
+                end))
+                LagbackNotifier:Clean(runService.Heartbeat:Connect(function()
+                    local char = lplr.Character
+                    local hrp = char and char:FindFirstChild('HumanoidRootPart')
+
+                    if hrp then
+                        if lastnetowner ~= isnetworkowner(hrp) then
+                            lastnetowner = isnetworkowner(hrp)
+                            if not lastnetowner then
+                                vape:CreateNotification('LagbackNotifier', 'Lagback detected', 3)
+                            end
+                        end
+                    end
+                end))
+            end
+        end
+    })
+end)
+run(function()
+    local conn
+
+    PixelSword = vape.Categories.Combat:CreateModule({
+        Name = "PixelSword",
+        Function = function(callback)
+            if callback then
+                conn = workspace.CurrentCamera.Viewmodel.ChildAdded:Connect(function(x)
+                    if x and x:FindFirstChild("Handle") then
+                        if string.find(x.Name:lower(), 'sword') then
+                            x.Handle.Material = Enum.Material.ForceField
+                            x.Handle.MeshId = "rbxassetid://13471207377"
+                            x.Handle.BrickColor = BrickColor.new("Hot pink")
+                        end
+                    end
+                end)
+            else
+                if conn then
+                    conn:Disconnect()
+                    conn = nil
+                end
+            end
+        end,
+        Default = false,
+        Tooltip = "Customizes Your Swords"
+    })
+end)
+
+run(function()
+    local AutoBuyWool
+    local shopId
+
+    local function getShopNPC()
+        local shop, newid = nil, nil
+        if entitylib.isAlive then
+            local localPosition = entitylib.character.RootPart.Position
+            for _, v in store.shop do
+                if (v.RootPart.Position - localPosition).Magnitude <= 10 then
+                    shop = v.Shop
+                    newid = v.Id
+                end
+            end
+        end
+        return shop, newid
+    end
+
+    local function buyWool()
+        local woolItem = bedwars.Shop.getShopItem('wool_white', lplr)
+        if woolItem and woolItem.currency == 'iron' then
+            local iron = getItem('iron')
+            if iron and iron.amount >= woolItem.price then
+                bedwars.Client:Get('BedwarsPurchaseItem'):CallServerAsync({
+                    shopItem = woolItem,
+                    shopId = shopId
+                })
+            end
+        end
+    end
+
+    AutoBuyWool = vape.Categories.Inventory:CreateModule({
+        Name = 'AutoBuyWool',
+        Tooltip = 'Buys White Wool instantly when you have ≥8 iron near shop',
+        Function = function(callback)
+            if callback then
+                task.spawn(function()
+                    repeat
+                        local iron = getItem('iron')
+                        local shop, newid = getShopNPC()
+                        if iron and iron.amount >= 8 and shop then
+                            shopId = newid
+                            buyWool()
+                        end
+                        task.wait(0.05) -- fast polling
+                    until not AutoBuyWool.Enabled
+                end)
+            end
+        end
+    })
+end)
+run(function()
+    Furryall = vape.Categories.Blatant:CreateModule({
+        Name = 'Furryall',
+        Function = function(callback)
+            local Players = game:GetService("Players")
+            local Workspace = game:GetService("Workspace")
+            local LOCAL_PLAYER = Players.LocalPlayer
+
+            local HEAD_ACCESSORY_ID = "rbxassetid://5460001849"
+            local HRP_ACCESSORY_ID = "rbxassetid://7485988593"
+
+            local insertedAccessories = {}
+
+            local function loadAccessory(assetId)
+                local asset = game:GetObjects(assetId)[1]
+                if not asset then return nil end
+                if asset:IsA("Accessory") then return asset end
+                for _, child in ipairs(asset:GetChildren()) do
+                    if child:IsA("Accessory") then return child end
+                end
+                return nil
+            end
+
+            local function weldAccessory(character, partName, assetId, offsetCFrame)
+                local part = character:FindFirstChild(partName)
+                if not part or not part:IsA("BasePart") then return end
+                local acc = loadAccessory(assetId)
+                if not acc then return end
+                acc = acc:Clone()
+                local handle = acc:FindFirstChild("Handle")
+                if not handle or not handle:IsA("BasePart") then return end
+
+                for _, p in acc:GetDescendants() do
+                    if p:IsA("BasePart") then
+                        p.Anchored = false
+                        p.CanCollide = false
+                        p.Transparency = 0
+                    end
+                end
+
+                acc.Parent = Workspace
+                handle.CFrame = part.CFrame * offsetCFrame
+
+                local weld = Instance.new("WeldConstraint")
+                weld.Part0 = part
+                weld.Part1 = handle
+                weld.Parent = handle
+
+                table.insert(insertedAccessories, acc)
+            end
+
+            local function applyAccessories(character)
+                if not character or not character.Parent then return end
+                weldAccessory(character, "Head", HEAD_ACCESSORY_ID, CFrame.new(0, 0.8, 0))
+                weldAccessory(character, "HumanoidRootPart", HRP_ACCESSORY_ID, CFrame.Angles(0, math.rad(180), 0) * CFrame.new(0, 0, -1) * CFrame.Angles(0, math.rad(180), 0))
+            end
+
+            local function isPlayerCharacter(model)
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player.Character == model then return true end
+                end
+                return false
+            end
+
+            local function processCharacters()
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LOCAL_PLAYER and player.Character then
+                        applyAccessories(player.Character)
+                    end
+                end
+                for _, model in ipairs(Workspace:GetChildren()) do
+                    if model:IsA("Model") and not isPlayerCharacter(model) and model:FindFirstChildWhichIsA("BasePart") then
+                        applyAccessories(model)
+                    end
+                end
+            end
+
+            local function onCharacterAdded(char)
+                char:WaitForChild("Head", 5)
+                char:WaitForChild("HumanoidRootPart", 5)
+                applyAccessories(char)
+            end
+
+            local function setupPlayer(player)
+                if player == LOCAL_PLAYER then return end
+                if player.Character then onCharacterAdded(player.Character) end
+                player.CharacterAdded:Connect(onCharacterAdded)
+            end
+
+            local function onWorkspaceAdded(child)
+                if child:IsA("Model") and not isPlayerCharacter(child) and child:FindFirstChild("HumanoidRootPart") then
+                    task.delay(0.1, function()
+                        applyAccessories(child)
+                    end)
+                end
+            end
+
+            if callback then
+                processCharacters()
+                for _, player in ipairs(Players:GetPlayers()) do setupPlayer(player) end
+                Players.PlayerAdded:Connect(setupPlayer)
+                Workspace.ChildAdded:Connect(onWorkspaceAdded)
+            else
+                for _, acc in ipairs(insertedAccessories) do
+                    if acc and acc.Parent then acc:Destroy() end
+                end
+                insertedAccessories = {}
+            end
+        end,
+        Default = false,
+        Tooltip = "Makes everyone a furry except for you"
+    })
+end)
+run(function()
+    FirstPersonArm = vape.Categories.Utility:CreateModule({
+        Name = 'FirstPersonArm',
+        Function = function(callback)
+            local viewmodel = workspace:FindFirstChild("Camera") and workspace.Camera:FindFirstChild("Viewmodel")
+            if viewmodel then
+                local lowerArm = viewmodel:FindFirstChild("RightLowerArm")
+                local hand = viewmodel:FindFirstChild("RightHand")
+
+                if lowerArm and lowerArm:IsA("MeshPart") then
+                    lowerArm.Transparency = callback and 0 or 1
+                end
+
+                if hand and hand:IsA("MeshPart") then
+                    hand.Transparency = callback and 0 or 1
+                end
+            end
+        end,
+        Default = false,
+        Tooltip = "Self Explanatory"
+    })
+end)
+run(function()
+    GetHost = vape.Categories.Utility:CreateModule({
+        Name = 'GetHost',
+        Function = function(enabled)
+            local player = game.Players.LocalPlayer
+            if enabled then
+                player:SetAttribute("CustomMatchRole", "host")
+            else
+                player:SetAttribute("CustomMatchRole", nil) -- remove the role
+            end
+        end,
+        Default = false,
+        Tooltip = ":troll:"
+    })
+end)
+run(function()
+    local pack1
+	local packassetids = {
+		['Exhibition'] = 'rbxassetid://14060102755',
+		['Snoopy'] = 'rbxassetid://13782395340',
+		['Floshpa 16x'] = 'rbxassetid://14312698987',
+		['64x hentai'] = 'rbxassetid://14390823554',
+		['ducky 32x'] = 'rbxassetid://14415658661',
+		['GOOGLE CHROME'] = 'rbxassetid://14258942293',
+		['Chad'] = 'rbxassetid://14274833803',
+		['Looks like a fucking dick'] = 'rbxassetid://14614456664',
+		['SystemVoid 16x'] = 'rbxassetid://14217402799',
+		['Snoopy 16x Pack 2'] = 'rbxassetid://93716357946641',
+		['High res'] = 'rbxassetid://13780890894',
+		['Sentry 32x'] = 'rbxassetid://14254581941',
+		['Mastadawn'] = 'rbxassetid://14190963148',
+		['Old Meteor'] = 'rbxassetid://13802020264',
+		['Novoline'] = 'rbxassetid://13802560031',
+		['Minecraft Swords'] = 'rbxassetid://14427750969',
+		['MeteorX'] = 'rbxassetid://14028489054',
+		['Meteor older'] = 'rbxassetid://13993784995',
+	}
+    local TexturePacks 
+	TexturePacks = vape.Categories.Render:CreateModule({
+        Name = 'TexturePacks',
+        Tooltip = 'Gives you a cool unique textures for tools.',
+        Function = function(call)
+            if call then
+				local import = game:GetObjects(packassetids[pack1.Value])[1]
+				import.Parent = replicatedStorage
+				local index = {
+					{
+						name = "wood_sword",
+						offset = CFrame.Angles(math.rad(0),math.rad(-89),math.rad(-90)),
+						model = import:WaitForChild("Wood_Sword"),
+					},
+					{
+						name = "stone_sword",
+						offset = CFrame.Angles(math.rad(0),math.rad(-89),math.rad(-90)),
+						model = import:WaitForChild("Stone_Sword"),
+					},
+					{
+						name = "iron_sword",
+						offset = CFrame.Angles(math.rad(0),math.rad(-89),math.rad(-90)),
+						model = import:WaitForChild("Iron_Sword"),
+					},
+					{
+						name = "diamond_sword",
+						offset = CFrame.Angles(math.rad(0),math.rad(-89),math.rad(-90)),
+						model = import:WaitForChild("Diamond_Sword"),
+					},
+					{
+						name = "emerald_sword",
+						offset = CFrame.Angles(math.rad(0),math.rad(-89),math.rad(-90)),
+						model = import:WaitForChild("Emerald_Sword"),
+					},
+				}
+				for i,v in {'Wood', 'Diamond', 'Emerald', 'Stone', 'Iron', 'Gold'} do
+					if import:FindFirstChild(`{v}_Pickaxe`) then
+						table.insert(index, {
+							name = `{v:lower()}_pickaxe`,
+							offset = CFrame.Angles(math.rad(0), math.rad(-180), math.rad(-95)),
+							model = import[`{v}_Pickaxe`],
+						})
+					end
+					if import:FindFirstChild(v) then
+						table.insert(index, {
+							name = `{v:lower()}`,
+							offset = CFrame.Angles(math.rad(0),math.rad(-90),math.rad(table.find({'Emerald', 'Diamond'}, v) and 90 or -90)),
+							model = import[`{v}`],
+						})
+					end
+				end
+				TexturePacks:Clean(workspace.Camera.Viewmodel.ChildAdded:Connect(function(tool)
+					if(not tool:IsA("Accessory")) then return end
+					for i,v in pairs(index) do
+						if(v.name == tool.Name) then
+							for i,v in pairs(tool:GetDescendants()) do
+								if(v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation")) then
+									v.Transparency = 1
+								end
+							end
+							local model = v.model:Clone()
+							model.CFrame = tool:WaitForChild("Handle").CFrame * v.offset
+							model.CFrame *= CFrame.Angles(math.rad(0),math.rad(-50),math.rad(0))
+							model.Parent = tool
+							local weld = Instance.new("WeldConstraint",model)
+							weld.Part0 = model
+							weld.Part1 = tool:WaitForChild("Handle")
+							local tool2 = lplr.Character:WaitForChild(tool.Name)
+							for i,v in pairs(tool2:GetDescendants()) do
+								if(v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation")) then
+									v.Transparency = 1
+								end            
+							end            
+							local model2 = v.model:Clone()
+							model2.Anchored = false
+							model2.CFrame = tool2:WaitForChild("Handle").CFrame * v.offset
+							model2.CFrame *= CFrame.Angles(math.rad(0),math.rad(-50),math.rad(0))
+							model2.CFrame *= CFrame.new(0.6,0,-.9)
+							model2.Parent = tool2
+							local weld2 = Instance.new("WeldConstraint",model)
+							weld2.Part0 = model2
+							weld2.Part1 = tool2:WaitForChild("Handle")
+						end
+					end
+				end))
+            end
+        end
+    })
+	local list = {}
+	for i,v in packassetids do
+		table.insert(list, i)
+	end
+    pack1 = TexturePacks:CreateDropdown({
+        Name = 'Pack',
+        List = list,
+		Function = function()
+			if TexturePacks.Enabled then
+				TexturePacks:Toggle()
+				TexturePacks:Toggle()
+			end
+		end
+    })
+end)
