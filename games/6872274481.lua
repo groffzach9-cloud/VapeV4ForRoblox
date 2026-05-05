@@ -34100,7 +34100,7 @@ run(function()
         table.insert(shaderEffects, effect)
     end
 
-    vape.Categories.CloudWare:CreateModule({
+    vape.Categories.World:CreateModule({
         Name = "Realistic Shader",
         Tooltip = "Simulates RTX-style visuals using lighting and post effects.",
         Function = function(enabled)
@@ -34163,35 +34163,7 @@ run(function()
         end
     })
 end)																																																																																																																																																															
-run(function()
-    local PartyPopperExploit
-	PartyPopperExploit = vape.Categories.Utility:CreateModule({
-        Name = "PartyPopperExploit",
-        Function = function(callback)
-            if callback then
-                PartyPopperExploit:Clean(runService.Heartbeat:Connect(function()
-                    bedwars.AbilityController:useAbility('PARTY_POPPER')
-                end))
-            end
-        end,
-        Tooltip = 'LETSS PARTYYYYYY'
-    })
-end)
 
-run(function()
-    local TrainWhistleExploit
-	TrainWhistleExploit = vape.Categories.Utility:CreateModule({
-        Name = 'TrainWhistleExploit',
-        Function = function(callback)
-            if callback then
-                TrainWhistleExploit:Clean(runService.Heartbeat:Connect(function()
-                    bedwars.AbilityController:useAbility('TRAIN_WHISTLE')
-                end))
-            end
-        end,
-        Tooltip = 'Makes you a train'
-    })
-end)
 
 run(function()
 	local HotbarVisuals: table = {}
@@ -34260,7 +34232,7 @@ run(function()
 		end;
 	end;
 
-	HotbarVisuals = vape.Categories.Render:CreateModule({
+	HotbarVisuals = vape.Categories.World:CreateModule({
 		["Name"] = 'HotbarVisuals',
 		["Tooltip"] = 'Add customization to your hotbar.',
 		["Function"] = function(callback: boolean): void
@@ -34402,7 +34374,7 @@ run(function()
 		task.wait(FakeLagSpeed5.Value / 10)
 		entitylib.character.Humanoid.WalkSpeed = FakeLagSpeed3.Value
 	end
-	FakeLag = vape.Categories.Blatent:CreateModule({
+	FakeLag = vape.Categories.World:CreateModule({
 		Name = "FakeLag",
         Tooltip = "Makes people think you're laggy",
 		Function = function(callback)
@@ -34604,7 +34576,7 @@ run(function()
         end
     }
 
-    AnimeImages = vape.Categories.Utility:CreateModule({
+    AnimeImages = vape.Categories.World:CreateModule({
         Name = 'AnimeImages',
         Function = function(callback) 
             if callback then
