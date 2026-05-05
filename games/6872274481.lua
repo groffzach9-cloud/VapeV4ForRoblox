@@ -34056,7 +34056,7 @@ run(function()
         end
     end
 
-    AutoCorrect = vape.Categories.Utility:CreateModule({
+    AutoCorrect = vape.Categories.World:CreateModule({
         Name = 'AutoCorrect',
         Function = function(callback)
             if callback then
