@@ -34029,3 +34029,616 @@ run(function()
 		end
 	})
 end)
+run(function()
+    local AutoCorrect
+    local blacklistedwords = {
+        'hack',
+        'hax',
+        'cheat'
+    }
+
+    local function getWord(msg)
+		msg = string.lower(tostring(msg))
+        for i,v in blacklistedwords do
+            if string.find(tostring(msg), v) then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function sendmsg(msg)
+        if textChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(msg)
+        else
+            replicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, 'All')
+        end
+    end
+
+    AutoCorrect = vape.Categories.Blatent:CreateModule({
+        Name = 'AutoCorrect',
+        Function = function(callback)
+            if callback then
+                for i,v in playersService:GetPlayers() do
+                    if v ~= lplr then
+                        AutoCorrect:Clean(v.Chatted:Connect(function(msg)
+                            if getWord(msg) then
+                                sendmsg('Actually, '..v.Name..' it\'s called "Exploiters/Exploits".')
+                            end
+                        end))
+                    end
+                end
+
+				AutoCorrect:Clean(playersService.PlayerAdded:Connect(function(plr)
+                    AutoCorrect:Clean(plr.Chatted:Connect(function(msg)
+						if getWord(msg) then
+							sendmsg('Actually, '..plr.Name..' it\'s called "Exploiters/Exploits".')
+						end
+					end))
+                end))
+            end
+        end,
+        Tooltip = 'Automatically corrects someone for using the incorrect terminology.'
+    })
+end)
+
+run(function()
+    local Lighting = game:GetService("Lighting")
+
+    -- Store effects to remove later
+    local shaderEffects = {}
+
+    -- Helper to create & apply an effect
+    local function addEffect(className, props)
+        local effect = Instance.new(className)
+        for prop, val in pairs(props) do
+            effect[prop] = val
+        end
+        effect.Name = "CloudWare_" .. className
+        effect.Parent = Lighting
+        table.insert(shaderEffects, effect)
+    end
+
+    vape.Categories.CloudWare:CreateModule({
+        Name = "Realistic Shader",
+        Tooltip = "Simulates RTX-style visuals using lighting and post effects.",
+        Function = function(enabled)
+            if enabled then
+                -- Darker, richer world lighting
+                Lighting.Brightness = 1.2
+                Lighting.OutdoorAmbient = Color3.fromRGB(45, 45, 55)
+                Lighting.Ambient = Color3.fromRGB(22, 22, 30)
+                Lighting.EnvironmentDiffuseScale = 0.4
+                Lighting.EnvironmentSpecularScale = 0.6
+                Lighting.GlobalShadows = true
+                Lighting.ClockTime = 17  -- dusk
+
+                -- Simulated RTX-style post-processing
+                addEffect("BloomEffect", {
+                    Intensity = 0.6,
+                    Threshold = 0.8,
+                    Size = 56
+                })
+
+                addEffect("ColorCorrectionEffect", {
+                    Brightness = 0.3,
+                    Contrast = 0.35,
+                    Saturation = 0.15,
+                    TintColor = Color3.fromRGB(200, 200, 230)
+                })
+
+                addEffect("SunRaysEffect", {
+                    Intensity = 0.12,
+                    Spread = 0.25
+                })
+
+                addEffect("DepthOfFieldEffect", {
+                    FarIntensity = 0.3,
+                    FocusDistance = 25,
+                    InFocusRadius = 15,
+                    NearIntensity = 0.2
+                })
+
+                addEffect("BlurEffect", {
+                    Size = 1
+                })
+            else
+                -- Restore lighting defaults (optional, tweak as needed)
+                Lighting.Brightness = 2
+                Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+                Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+                Lighting.EnvironmentDiffuseScale = 1
+                Lighting.EnvironmentSpecularScale = 1
+                Lighting.ClockTime = 14
+
+                -- Remove shader effects
+                for _, effect in pairs(shaderEffects) do
+                    if effect and effect.Parent then
+                        effect:Destroy()
+                    end
+                end
+                shaderEffects = {}
+            end
+        end
+    })
+end)																																																																																																																																																															
+run(function()
+    local PartyPopperExploit
+	PartyPopperExploit = vape.Categories.Utility:CreateModule({
+        Name = "PartyPopperExploit",
+        Function = function(callback)
+            if callback then
+                PartyPopperExploit:Clean(runService.Heartbeat:Connect(function()
+                    bedwars.AbilityController:useAbility('PARTY_POPPER')
+                end))
+            end
+        end,
+        Tooltip = 'LETSS PARTYYYYYY'
+    })
+end)
+
+run(function()
+    local TrainWhistleExploit
+	TrainWhistleExploit = vape.Categories.Utility:CreateModule({
+        Name = 'TrainWhistleExploit',
+        Function = function(callback)
+            if callback then
+                TrainWhistleExploit:Clean(runService.Heartbeat:Connect(function()
+                    bedwars.AbilityController:useAbility('TRAIN_WHISTLE')
+                end))
+            end
+        end,
+        Tooltip = 'Makes you a train'
+    })
+end)
+
+run(function()
+	local HotbarVisuals: table = {}
+	local HotbarRounding: table  = {}
+	local HotbarHighlight: table  = {}
+	local HotbarColorToggle: table  = {}
+	local HotbarHideSlotIcons: table  = {}
+	local HotbarSlotNumberColorToggle: table  = {}
+	local HotbarSpacing: table  = {Value = 0}
+	local HotbarInvisibility: table  = {Value = 4}
+	local HotbarRoundRadius: table  = {Value = 8}
+	local HotbarColor: table  = {}
+	local HotbarHighlightColor: table  = {}
+	local HotbarSlotNumberColor: table  = {}
+	local hotbarcoloricons: table  = {}
+	local hotbarsloticons: table  = {}
+	local hotbarobjects: table  = {}
+	local hotbarslotgradients: table  = {}
+	local inventoryiconobj: any = nil
+
+	local function hotbarFunction(): (any, any)
+		local icons: any = ({pcall(function() return lplr.PlayerGui.hotbar["1"].ItemsHotbar end)})[2];
+		if not (icons and typeof(icons) == "Instance") then return end;
+
+		inventoryiconobj = icons;
+		pcall(function()
+			local layout: UIListLayout? = icons:FindFirstChildOfClass("UIListLayout");
+			if layout then layout.Padding = UDim.new(0, HotbarSpacing.Value); end
+		end);
+
+		for _, v: Instance in pairs(icons:GetChildren()) do
+			local sloticon: TextLabel? = ({pcall(function() return v:FindFirstChildWhichIsA("ImageButton"):FindFirstChildWhichIsA("TextLabel") end)})[2];
+			if typeof(sloticon) ~= "Instance" then continue end;
+
+			local parent: GuiObject = sloticon.Parent;
+			table.insert(hotbarcoloricons, parent);
+			sloticon.Parent.Transparency = 0.1 * HotbarInvisibility.Value;
+
+			if HotbarColorToggle.Enabled and not HotbarVisualsGradient.Enabled then
+				parent.BackgroundColor3 = Color3.fromHSV(HotbarColor.Hue, HotbarColor.Sat, HotbarColor.Value);
+			elseif HotbarVisualsGradient.Enabled and not parent:FindFirstChildWhichIsA("UIGradient") then
+				parent.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+				local g: UIGradient = Instance.new("UIGradient");
+				g.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromHSV(HotbarVisualsGradientColor.Hue, HotbarVisualsGradientColor.Sat, HotbarVisualsGradientColor.Value)),
+					ColorSequenceKeypoint.new(1, Color3.fromHSV(HotbarVisualsGradientColor2.Hue, HotbarVisualsGradientColor2.Sat, HotbarVisualsGradientColor2.Value))
+				});
+				g.Parent = parent;
+				table.insert(hotbarslotgradients, g);
+			end;
+
+			if HotbarRounding.Enabled then
+				local r: UICorner = Instance.new("UICorner"); r.CornerRadius = UDim.new(0, HotbarRoundRadius.Value);
+				r.Parent = parent; table.insert(hotbarobjects, r);
+			end;
+
+			if HotbarHighlight.Enabled then
+				local hl: UIStroke = Instance.new("UIStroke");
+				hl.Color = Color3.fromHSV(HotbarHighlightColor.Hue, HotbarHighlightColor.Sat, HotbarHighlightColor.Value);
+				hl.Thickness = 1.3; hl.Parent = parent;
+				table.insert(hotbarobjects, hl);
+			end;
+
+			if HotbarHideSlotIcons.Enabled then sloticon.Visible = false; end;
+			table.insert(hotbarsloticons, sloticon);
+		end;
+	end;
+
+	HotbarVisuals = vape.Categories.Render:CreateModule({
+		["Name"] = 'HotbarVisuals',
+		["Tooltip"] = 'Add customization to your hotbar.',
+		["Function"] = function(callback: boolean): void
+			if callback then 
+				task.spawn(function()
+					table.insert(HotbarVisuals.Connections, lplr.PlayerGui.DescendantAdded:Connect(function(v)
+						if v.Name == "hotbar" then hotbarFunction(); end
+					end));
+					hotbarFunction();
+				end);
+				table.insert(HotbarVisuals.Connections, runService.RenderStepped:Connect(function()
+					for _, v in hotbarcoloricons do pcall(function() v.Transparency = 0.1 * HotbarInvisibility["Value"]; end); end
+				end));
+			else
+				for _: any, v: any in hotbarsloticons do pcall(function() v.Visible = true; end); end
+				for _: any, v: any in hotbarcoloricons do pcall(function() v.BackgroundColor3 = Color3.fromRGB(29, 36, 46); end); end
+				for _: any, v: any in hotbarobjects do pcall(function() v:Destroy(); end); end
+				for _: any, v: any in hotbarslotgradients do pcall(function() v:Destroy(); end); end
+				table.clear(hotbarobjects); table.clear(hotbarsloticons); table.clear(hotbarcoloricons);
+			end;
+		end;
+	})
+	local function forceRefresh()
+		if HotbarVisuals["Enabled"] then HotbarVisuals:Toggle(); HotbarVisuals:Toggle(); end;
+	end;
+	HotbarColorToggle = HotbarVisuals:CreateToggle({
+		["Name"] = "Slot Color",
+		["Function"] = function(callback: boolean): void pcall(function() HotbarColor.Object.Visible = callback; end); forceRefresh(); end
+	});
+	HotbarVisualsGradient = HotbarVisuals:CreateToggle({
+		["Name"] = "Gradient Slot Color",
+		["Function"] = function(callback: boolean): void
+			pcall(function()
+				HotbarVisualsGradientColor.Object.Visible = callback;
+				HotbarVisualsGradientColor2.Object.Visible = callback;
+			end);
+			forceRefresh();
+		end;
+	});
+	HotbarVisualsGradientColor = HotbarVisuals:CreateColorSlider({
+		["Name"] = 'Gradient Color',
+		["Function"] = function(h, s, v)
+			for i: any, v: any in hotbarslotgradients do 
+				pcall(function() v.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromHSV(HotbarVisualsGradientColor.Hue, HotbarVisualsGradientColor.Sat, HotbarVisualsGradientColor.Value)), ColorSequenceKeypoint.new(1, Color3.fromHSV(HotbarVisualsGradientColor2.Hue, HotbarVisualsGradientColor2.Sat, HotbarVisualsGradientColor2.Value))}) end)
+			end;
+		end;
+	})
+	HotbarVisualsGradientColor2 = HotbarVisuals:CreateColorSlider({
+		["Name"] = 'Gradient Color 2',
+		["Function"] = function(h, s, v)
+			for i: any,v: any in hotbarslotgradients do 
+				pcall(function() v.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromHSV(HotbarVisualsGradientColor.Hue, HotbarVisualsGradientColor.Sat, HotbarVisualsGradientColor.Value)), ColorSequenceKeypoint.new(1, Color3.fromHSV(HotbarVisualsGradientColor2.Hue, HotbarVisualsGradientColor2.Sat, HotbarVisualsGradientColor2.Value))}) end)
+			end;
+		end;
+	})
+	HotbarColor = HotbarVisuals:CreateColorSlider({
+		["Name"] = 'Slot Color',
+		["Function"] = function(h, s, v)
+			for i: any,v: any in hotbarcoloricons do
+				if HotbarColorToggle["Enabled"] then
+					pcall(function() v.BackgroundColor3 = Color3.fromHSV(HotbarColor.Hue, HotbarColor.Sat, HotbarColor.Value) end) 
+				end;
+			end;
+		end;
+	})
+	HotbarRounding = HotbarVisuals:CreateToggle({
+		["Name"] = 'Rounding',
+		["Function"] = function(callback: boolean): void pcall(function() HotbarRoundRadius.Object.Visible = callback; end); forceRefresh(); end
+	})
+	HotbarRoundRadius = HotbarVisuals:CreateSlider({
+		["Name"] = 'Corner Radius',
+		["Min"] = 1,
+		["Max"] = 20,
+		["Function"] = function(callback: boolean): void
+			for i,v in hotbarobjects do 
+				pcall(function() v.CornerRadius = UDim.new(0, callback) end);
+			end;
+		end;
+	})
+	HotbarHighlight = HotbarVisuals:CreateToggle({
+		["Name"] = 'Outline Highlight',
+		["Function"] = function(callback: boolean): void pcall(function() HotbarHighlightColor.Object.Visible = callback; end); forceRefresh(); end
+	})
+	HotbarHighlightColor = HotbarVisuals:CreateColorSlider({
+		["Name"] = 'Highlight Color',
+		["Function"] = function(h, s, v)
+			for i,v in hotbarobjects do 
+				if v:IsA('UIStroke') and HotbarHighlight.Enabled then 
+					pcall(function() v.Color = Color3.fromHSV(HotbarHighlightColor.Hue, HotbarHighlightColor.Sat, HotbarHighlightColor.Value) end)
+				end;
+			end;
+		end;
+	})
+	HotbarHideSlotIcons = HotbarVisuals:CreateToggle({
+		["Name"] = "No Slot Numbers", ["Function"] = forceRefresh
+	});
+	HotbarInvisibility = HotbarVisuals:CreateSlider({
+		["Name"] = 'Invisibility',
+		["Min"] = 0,
+		["Max"] = 10,
+		["Default"] = 4,
+		["Function"] = function(value)
+			for i,v in hotbarcoloricons do 
+				pcall(function() v.Transparency = (0.1 * value) end); 
+			end;
+		end;
+	})
+	HotbarSpacing = HotbarVisuals:CreateSlider({
+		["Name"] = 'Spacing',
+		["Min"] = 0,
+		["Max"] = 5,
+		["Function"] = function(value)
+			if HotbarVisuals["Enabled"] then 
+				pcall(function() inventoryiconobj:FindFirstChildOfClass('UIListLayout').Padding = UDim.new(0, value) end);
+			end;
+		end;
+	})
+	HotbarColor.Object.Visible = false;
+	HotbarRoundRadius.Object.Visible = false;
+	HotbarHighlightColor.Object.Visible = false;
+end);
+
+run(function()
+	local FakeLag = {Enabled = false}
+	local FakeLagUsage = {Value = "Blatant"}
+	local FakeLagSpeed = {Enabled = false}
+	local FakeLagDelay1 = {Value = 2}
+	local FakeLagDelay2 = {Value = 7}
+	local FakeLagDelayLegit = {Value = 3}
+	local FakeLagSpeed1 = {Value = 22}
+	local FakeLagSpeed2 = {Value = 18}
+	local FakeLagSpeed3 = {Value = 20}
+	local FakeLagSpeed4 = {Value = 2.7}
+	local FakeLagSpeed5 = {Value = 1.5}
+	local function ChangeSpeeds() -- this won't work with speed but ok
+		entitylib.character.Humanoid.WalkSpeed = FakeLagSpeed1.Value
+		task.wait(FakeLagSpeed4.Value / 10)
+		entitylib.character.Humanoid.WalkSpeed = FakeLagSpeed2.Value
+		task.wait(FakeLagSpeed5.Value / 10)
+		entitylib.character.Humanoid.WalkSpeed = FakeLagSpeed3.Value
+	end
+	FakeLag = vape.Categories.Blatent:CreateModule({
+		Name = "FakeLag",
+        Tooltip = "Makes people think you're laggy",
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					repeat task.wait()
+						if FakeLagUsage.Value == "Blatant" then
+							entitylib.character.HumanoidRootPart.Anchored = true
+							task.wait(FakeLagDelay1.Value / 10)
+							entitylib.character.HumanoidRootPart.Anchored = false
+							ChangeSpeeds()
+							task.wait(FakeLagDelay2.Value/10)
+						elseif FakeLagUsage.Value == "Legit" then
+							entitylib.character.HumanoidRootPart.Anchored = true
+							task.wait(FakeLagDelay1.Value / 10 + FakeLagDelayLegit.Value)
+							entitylib.character.HumanoidRootPart.Anchored = false
+							ChangeSpeeds()
+							task.wait(FakeLagDelay2.Value / 10 + FakeLagDelayLegit.Value)
+						end
+					until not FakeLag.Enabled
+				end)
+			else
+				if entitylib.character.HumanoidRootPart.Anchored then
+					entitylib.character.HumanoidRootPart.Anchored = false
+				end
+			end
+		end,
+		ExtraText = function()
+			return FakeLagUsage.Value
+		end
+	})
+FakeLagUsage = FakeLag:CreateDropdown({
+    Name = "Mode",
+    List = {
+        "Blatant",
+        "Legit"
+    },
+    Tooltip = "FakeLag Mode",
+    Function = function() end
+})
+
+FakeLagSpeed = FakeLag:CreateToggle({
+    Name = "Speed",
+    Default = false,
+    Tooltip = "Changes speed",
+    Function = function() end
+})
+
+FakeLagDelay1 = FakeLag:CreateSlider({
+    Name = "Anchored Delay",
+    Min = 0,
+    Max = 20,
+    Tooltip = "Anchored Delay Value",
+    Function = function() end,
+    Default = 2
+})
+
+FakeLagDelay2 = FakeLag:CreateSlider({
+    Name = "Unanchored Delay",
+    Min = 0,
+    Max = 20,
+    Tooltip = "Not Anchored Delay Value",
+    Function = function() end,
+    Default = 7
+})
+
+FakeLagDelayLegit = FakeLag:CreateSlider({
+    Name = "Legit",
+    Min = 1,
+    Max = 10,
+    Tooltip = "Legit Time",
+    Function = function() end,
+    Default = 3
+})
+
+FakeLagSpeed1 = FakeLag:CreateSlider({
+    Name = "Speed 1",
+    Min = 1,
+    Max = 22,
+    Tooltip = "Speed 1 Value",
+    Function = function() end,
+    Default = 22
+})
+
+FakeLagSpeed2 = FakeLag:CreateSlider({
+    Name = "Speed 2",
+    Min = 1,
+    Max = 20,
+    Tooltip = "Speed 2 Value",
+    Function = function() end,
+    Default = 18
+})
+
+FakeLagSpeed3 = FakeLag:CreateSlider({
+    Name = "Speed 3",
+    Min = 1,
+    Max = 20,
+    Tooltip = "Speed 3 Value",
+    Function = function() end,
+    Default = 20
+})
+
+FakeLagSpeed4 = FakeLag:CreateSlider({
+    Name = "Speed Delay 1",
+    Min = 1,
+    Max = 3,
+    Tooltip = "Speed Delay 1 Value",
+    Function = function() end,
+    Default = 2.7
+})
+
+FakeLagSpeed5 = FakeLag:CreateSlider({
+    Name = "Speed Delay 2",
+    Min = 1,
+    Max = 3,
+    Tooltip = "Speed Delay 2 Value",
+    Function = function() end,
+    Default = 1.5
+})
+end)
+
+run(function()
+    local AnimeImages
+    local AnimeSelection
+    local anime_imageids = {
+        ['Waifu1'] = 'rbxassetid://14417732284',
+        ['Waifu2'] = 'rbxassetid://14665237598'
+    }
+	
+    local animefunctions = {
+        Waifu1 = function() 
+            task.spawn(function()
+				local scale
+				local scaledUI = Instance.new('UIScale')
+				local Anime = Instance.new('ScreenGui')
+				local ImageLabel = Instance.new('ImageLabel')
+				local scalebla = Instance.new('Frame')
+				Anime.Name = 'Anime'
+				Anime.Parent = coreGui
+				Anime.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+				scalebla.Name = 'ScaledGui'
+				scalebla.Size = UDim2.fromScale(1, 1)
+				scalebla.BackgroundTransparency = 1
+				scalebla.Parent = gui
+				ImageLabel.Parent = Anime
+				ImageLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+				ImageLabel.BackgroundTransparency = 1
+				ImageLabel.BorderColor3 = Color3.new(0, 0, 0)
+				ImageLabel.BorderSizePixel = 0
+				ImageLabel.AnchorPoint = Vector2.new(1, 0)
+				ImageLabel.Position = UDim2.new(1, -1, 0, -3)
+				ImageLabel.Size = UDim2.new(0, 244, 0, 410)
+				ImageLabel.Image = tostring(anime_imageids[tostring(AnimeSelection.Value)])
+				ImageLabel.ScaleType = Enum.ScaleType.Fit
+				scaledUI.Scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				scaledUI.Parent = ImageLabel
+				scalebla.Size = UDim2.fromScale(1 / scale, 1 / scale)
+
+				AnimeImages:Clean(ImageLabel:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+					scaledUI.Scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				end))
+            end)
+        end,
+        
+        Waifu2 = function() 
+            task.spawn(function()
+				local scale
+				local scaledUI = Instance.new('UIScale')
+				local Anime = Instance.new('ScreenGui')
+				local ImageLabel = Instance.new('ImageLabel')
+				local scalebla = Instance.new('Frame')
+				Anime.Name = 'Anime'
+				Anime.Parent = coreGui
+				Anime.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+				scalebla.Name = 'ScaledGui'
+				scalebla.Size = UDim2.fromScale(1, 1)
+				scalebla.BackgroundTransparency = 1
+				scalebla.Parent = Anime
+				ImageLabel.Parent = Anime
+				ImageLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+				ImageLabel.BackgroundTransparency = 1
+				ImageLabel.BorderColor3 = Color3.new(0, 0, 0)
+				ImageLabel.BorderSizePixel = 0
+				ImageLabel.AnchorPoint = Vector2.new(1, 0)
+				ImageLabel.Position = UDim2.new(1, -1, 0, -25)
+				ImageLabel.Size = UDim2.new(0, 244, 0, 410)
+				ImageLabel.Image = tostring(anime_imageids[tostring(AnimeSelection.Value)])
+				ImageLabel.ScaleType = Enum.ScaleType.Fit
+				scaledUI.Scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				scaledUI.Parent = ImageLabel
+				scalebla.Size = UDim2.fromScale(1 / scale, 1 / scale)
+
+				AnimeImages:Clean(ImageLabel:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+					scaledUI.Scale = math.max(ImageLabel.AbsoluteSize.X / 1920, 0.6)
+				end))
+            end)
+        end
+    }
+
+    AnimeImages = vape.Categories.Utility:CreateModule({
+        Name = 'AnimeImages',
+        Function = function(callback) 
+            if callback then
+				for i,v in coreGui:GetChildren() do
+                    if v.Name == 'Anime' then
+                        v:Destroy()
+                    end
+                end
+
+                animefunctions[AnimeSelection.Value]()
+            else
+                for i,v in coreGui:GetChildren() do
+                    if v.Name == 'Anime' then
+                        v:Destroy()
+                    end
+                end
+            end
+        end,
+        Tooltip = 'Displays your desired image of Anime girls.',
+        ExtraText = function()
+            return AnimeSelection.Value
+        end
+    })
+	AnimeSelection = AnimeImages:CreateDropdown({
+		Name = 'Selection',
+		Function = function(val)
+			for i,v in coreGui:GetChildren() do
+                if v.Name == 'Anime' then
+                    v:Destroy()
+                end
+            end
+
+            animefunctions[val]()
+		end,
+		List = {'Waifu1', 'Waifu2'}
+	})
+end)
