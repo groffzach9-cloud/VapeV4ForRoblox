@@ -49,6 +49,10 @@ local contextActionService = cloneref(game:GetService('ContextActionService'))
 local guiService = cloneref(game:GetService('GuiService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
 local starterGui = cloneref(game:GetService('StarterGui'))
+local starterPlayer = cloneref(game:GetService('StarterPlayer'))
+local debris = cloneref(game:GetService('Debris'))
+local materialService = cloneref(game:GetService('MaterialService'))
+local teleportService = cloneref(game:GetService('TeleportService'))
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local lightingService = cloneref(game:GetService('Lighting'))
 
@@ -911,7 +915,7 @@ run(function()
         SyncEventPriority = require(replicatedStorage.rbxts_include.node_modules['@easy-games']['sync-event'].out),
 		AbilityId = require(replicatedStorage.TS.ability['ability-id']).AbilityId,
         IdUtil = require(replicatedStorage.TS.util['id-util']).IdUtil,
-		BlockSelector = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out.client.select["block-selector"]).BlockSelector,
+		BlockSelector = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].out.client.select["block-selector"]).BlockSelector,
 		KnockbackUtilInstance = replicatedStorage.TS.damage['knockback-util'],
 		BedwarsKitSkin = require(replicatedStorage.TS.games.bedwars['kit-skin']['bedwars-kit-skin-meta']).BedwarsKitSkinMeta,
 		KitController = Knit.Controllers.KitController,
@@ -919,9 +923,9 @@ run(function()
 		FishMeta = require(replicatedStorage.TS.games.bedwars.kit.kits.fisherman['fish-meta']),
 	 	MatchHistroyApp = require(lplr.PlayerScripts.TS.controllers.global["match-history"].ui["match-history-moderation-app"]).MatchHistoryModerationApp,
 	 	MatchHistroyController = Knit.Controllers.MatchHistoryController,
-		BlockEngine = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine,
-		BlockSelectorMode = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out.client.select["block-selector"]).BlockSelectorMode,
-		EntityUtil = require(game:GetService("ReplicatedStorage").TS.entity["entity-util"]).EntityUtil,
+		BlockEngine = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine,
+		BlockSelectorMode = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].out.client.select["block-selector"]).BlockSelectorMode,
+		EntityUtil = require(replicatedStorage.TS.entity["entity-util"]).EntityUtil,
 		GamePlayer = require(replicatedStorage.TS.player['game-player']),
 		OfflinePlayerUtil = require(replicatedStorage.TS.player['offline-player-util']),
 		PlayerUtil = require(replicatedStorage.TS.player['player-util']),
@@ -8012,7 +8016,7 @@ run(function()
 				pcall(function() inputService.MouseIconEnabled = true end)
 				task.defer(function()
 					pcall(function() inputService.MouseIconEnabled = true end)
-					pcall(function() game:GetService('UserInputService').MouseIconEnabled = true end)
+					pcall(function() inputService.MouseIconEnabled = true end)
 				end)
 			end
 		end,
@@ -8129,7 +8133,7 @@ run(function()
 				pcall(function() inputService.MouseIconEnabled = true end)
 				task.defer(function()
 					pcall(function() inputService.MouseIconEnabled = true end)
-					pcall(function() game:GetService('UserInputService').MouseIconEnabled = true end)
+					pcall(function() inputService.MouseIconEnabled = true end)
 				end)
 			end
 		end
@@ -8685,7 +8689,7 @@ run(function()
 		Function = function(call)
 			if call then
 				a:Toggle(false)
-				game:GetService("ReplicatedStorage"):WaitForChild("events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events"):WaitForChild("leaveParty"):FireServer()
+				replicatedStorage:WaitForChild("events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events"):WaitForChild("leaveParty"):FireServer()
 			end
 		end
 	})
@@ -9504,7 +9508,7 @@ run(function()
         task.spawn(function()
             if vape.ThreadFix then setthreadidentity(8) end
             local ok, meta = pcall(function()
-                return require(game:GetService('ReplicatedStorage').TS.enchant['enchant-meta'])
+                return require(replicatedStorage.TS.enchant['enchant-meta'])
             end)
             if not ok or not meta then return end
             for _, subMeta in pairs({meta.EnchantMeta, meta.ToolEnchantMeta, meta.ArmorEnchantMeta}) do
@@ -11967,7 +11971,7 @@ run(function()
 								clawModel.PrimaryPart.Anchored = true
 								local portalConn
 								if clawModel:FindFirstChild("Portal1") then
-									portalConn = game:GetService("RunService").Heartbeat:Connect(function()
+									portalConn = runService.Heartbeat:Connect(function()
 										local foreArmCF = clawModel.RootPart.root.fore_arm.TransformedWorldCFrame
 										if clawModel.Portal1 then
 											clawModel.Portal1:PivotTo(foreArmCF)
@@ -12516,7 +12520,7 @@ run(function()
             if call then
                 local l__GameQueryUtil__8
                 if (not shared.CheatEngineMode) then 
-                    l__GameQueryUtil__8 = require(game:GetService("ReplicatedStorage")['rbxts_include']['node_modules']['@easy-games']['game-core'].out).GameQueryUtil 
+                    l__GameQueryUtil__8 = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out).GameQueryUtil 
                 else
                     local backup = {}; function backup:setQueryIgnored() end; l__GameQueryUtil__8 = backup;
                 end
@@ -12542,7 +12546,7 @@ run(function()
                 lastPosition = rootPart.Position
                 lastValidationCheck = 0
                 
-                local v10 = game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Effects"):WaitForChild("NightmareEmote"):Clone()
+                local v10 = replicatedStorage:WaitForChild("Assets"):WaitForChild("Effects"):WaitForChild("NightmareEmote"):Clone()
                 asset = v10
                 v10.Parent = game.Workspace
                 
@@ -13539,9 +13543,9 @@ run(function()
 	
 	local function getShopController()
 		local success, result = pcall(function()
-			local RuntimeLib = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+			local RuntimeLib = require(replicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 			if RuntimeLib then
-				return RuntimeLib.import(script, game:GetService("ReplicatedStorage"), "TS", "games", "bedwars", "shop", "bedwars-shop")
+				return RuntimeLib.import(script, replicatedStorage, "TS", "games", "bedwars", "shop", "bedwars-shop")
 			end
 		end)
 		
@@ -13549,7 +13553,7 @@ run(function()
 			return result
 		end
 		
-		local shopModule = game:GetService("ReplicatedStorage"):FindFirstChild("TS"):FindFirstChild("games"):FindFirstChild("bedwars"):FindFirstChild("shop"):FindFirstChild("bedwars-shop")
+		local shopModule = replicatedStorage:FindFirstChild("TS"):FindFirstChild("games"):FindFirstChild("bedwars"):FindFirstChild("shop"):FindFirstChild("bedwars-shop")
 		if shopModule and shopModule:IsA("ModuleScript") then
 			return require(shopModule)
 		end
@@ -16766,7 +16770,7 @@ run(function()
 				local clone = char:Clone()
 				clone.Humanoid.Health = 100
 				clone.Parent = workspace
-				game:GetService('Debris'):AddItem(clone, 30)
+				debris:AddItem(clone, 30)
 				char:Destroy()
 				task.wait(0.01)
 				clone.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
@@ -16812,8 +16816,8 @@ run(function()
 				part2.Transparency = 0.7
 				part2.Material = Enum.Material.SmoothPlastic
 				part2.Parent = workspace
-				game:GetService('Debris'):AddItem(part, 0.5)
-				game:GetService('Debris'):AddItem(part2, 0.5)
+				debris:AddItem(part, 0.5)
+				debris:AddItem(part2, 0.5)
 				bedwars.QueryUtil:setQueryIgnored(part, true)
 				bedwars.QueryUtil:setQueryIgnored(part2, true)
 				if i == 0 then
@@ -16956,7 +16960,7 @@ run(function()
             
             if callback then 
                 MatchHistory:Toggle(false)
-                local TeleportService = game:GetService("TeleportService")
+                local TeleportService = teleportService
                 local data = TeleportService:GetLocalPlayerTeleportData()
                 TeleportService:Teleport(game.PlaceId, game.Players.LocalPlayer, data)
             end
@@ -17307,7 +17311,7 @@ run(function()
 			task.spawn(function()
 				vape:Uninject()
 			end)
-			game:GetService('StarterGui'):SetCore('SendNotification', {
+			starterGui:SetCore('SendNotification', {
 				Title = 'StaffDetector',
 				Text = 'Staff Detected (' .. checktype .. ')\n' .. playerName .. ' (' .. playerId .. ')',
 				Duration = duration,
@@ -17826,7 +17830,7 @@ run(function()
 	local function getSpellLevel()
 		local level = 1
 		pcall(function()
-			local util = require(game:GetService("ReplicatedStorage").TS.games.bedwars.kit.kits.summoner['summoner-kit-util'])
+			local util = require(replicatedStorage.TS.games.bedwars.kit.kits.summoner['summoner-kit-util'])
 			local result = util.summoner_getPlayerSpellLevel(lplr)
 			if result then level = result end
 		end)
@@ -17836,7 +17840,7 @@ run(function()
 	local function getCastTime(level)
 		local castTime = 2
 		pcall(function()
-			local util = require(game:GetService("ReplicatedStorage").TS.games.bedwars.kit.kits.summoner['summoner-kit-util'])
+			local util = require(replicatedStorage.TS.games.bedwars.kit.kits.summoner['summoner-kit-util'])
 			local result = util.summoner_getTotalCastTimeRequired(level)
 			if result then castTime = result end
 		end)
@@ -17845,7 +17849,7 @@ run(function()
 
 	local function fireUseAbility(abilityName)
 		pcall(function()
-			game:GetService("ReplicatedStorage")
+			replicatedStorage
 				:WaitForChild("events-@easy-games/game-core:shared/game-core-networking@getEvents.Events")
 				:WaitForChild("useAbility"):FireServer(abilityName)
 		end)
@@ -17856,7 +17860,7 @@ run(function()
 		isChargingAbility = true
 
 		pcall(function()
-			local remote = game:GetService("ReplicatedStorage")
+			local remote = replicatedStorage
 				:WaitForChild("events-@easy-games/game-core:shared/game-core-networking@getEvents.Events")
 				:WaitForChild("useAbility")
 
@@ -18338,7 +18342,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				local OrangeMaterial = Instance.new('MaterialVariant')
-				OrangeMaterial.Parent = cloneref(game:GetService('MaterialService'))
+				OrangeMaterial.Parent = cloneref(materialService)
 				OrangeMaterial.Name = 'rbxassetid://16991768606_red'
 				OrangeMaterial.ColorMap = 'rbxassetid://16991768606'
 				OrangeMaterial.StudsPerTile = 3
@@ -18346,7 +18350,7 @@ run(function()
 				OrangeMaterial.BaseMaterial = 'Fabric'
 				
 				local PinkMaterial = Instance.new('MaterialVariant')
-				PinkMaterial.Parent = cloneref(game:GetService('MaterialService'))
+				PinkMaterial.Parent = cloneref(materialService)
 				PinkMaterial.Name = 'rbxassetid://16991768606_green'
 				PinkMaterial.ColorMap = 'rbxassetid://16991768606'
 				PinkMaterial.StudsPerTile = 3
@@ -19005,7 +19009,7 @@ run(function()
                 end)
                 table.insert(connections, playerRemovingConn)
 
-                renderConn = game:GetService("RunService").RenderStepped:Connect(function()
+                renderConn = runService.RenderStepped:Connect(function()
                     local myChar = LocalPlayer.Character
                     if not myChar then return end
                     local myHead = myChar:FindFirstChild("Head")
@@ -24663,7 +24667,7 @@ run(function()
     local Players = playersService
     local lplr = Players.LocalPlayer
     local RunService = runService
-    local Workspace = game:GetService("Workspace")
+    local Workspace = workspace
     
     local function isMyDrill(drill)
         if not drill then return false end
@@ -25658,7 +25662,7 @@ run(function()
 
     local function useWaterAbility()
         local success = pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("events-@easy-games/game-core:shared/game-core-networking@getEvents.Events"):WaitForChild("useAbility"):FireServer("spirit_gardener_water")
+            replicatedStorage:WaitForChild("events-@easy-games/game-core:shared/game-core-networking@getEvents.Events"):WaitForChild("useAbility"):FireServer("spirit_gardener_water")
         end)
         return success
     end
@@ -25707,7 +25711,7 @@ run(function()
             
             local Players = playersService
             local CollectionService = collectionService
-            local Workspace = game:GetService("Workspace")
+            local Workspace = workspace
             
             local Character = Players.LocalPlayer.Character
             if not Character or not Character.PrimaryPart then
@@ -26058,7 +26062,7 @@ run(function()
 		repeat task.wait() until debug.getupvalue(Knit.Start, 1)
 	end
 
-	local Players = game:GetService("Players")
+	local Players = playersService
 
 	shared.PERMISSION_CONTROLLER_HASANYPERMISSIONS_REVERT = shared.PERMISSION_CONTROLLER_HASANYPERMISSIONS_REVERT or Knit.Controllers.PermissionController.hasAnyPermissions
 	shared.MATCH_CONTROLLER_GETPLAYERPARTY_REVERT = shared.MATCH_CONTROLLER_GETPLAYERPARTY_REVERT or Knit.Controllers.MatchController.getPlayerParty
@@ -26646,7 +26650,7 @@ run(function()
     end
 
     local function setupLuciaSpy()
-        local util = require(game:GetService("ReplicatedStorage").TS.games.bedwars.kit.kits['piggy-bank']['piggy-bank-util']).PiggyBankUtil
+        local util = require(replicatedStorage.TS.games.bedwars.kit.kits['piggy-bank']['piggy-bank-util']).PiggyBankUtil
 
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("BasePart") and obj.Name == "pinata" then
@@ -27081,11 +27085,11 @@ run(function()
     local MaxBuffStacks = 30 
 
     pcall(function()
-        local runtime = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-        local statusEffectPath = game:GetService("ReplicatedStorage"):WaitForChild("TS"):WaitForChild("status-effect")
+        local runtime = require(replicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+        local statusEffectPath = replicatedStorage:WaitForChild("TS"):WaitForChild("status-effect")
         StatusEffectUtil = runtime.import(script, statusEffectPath, "status-effect-util").StatusEffectUtil
         StatusEffectType = runtime.import(script, statusEffectPath, "status-effect-type").StatusEffectType
-        local oasisConstants = runtime.import(script, game:GetService("ReplicatedStorage"):WaitForChild("TS"):WaitForChild("kit"):WaitForChild("oasis"):WaitForChild("oasis-constants"))
+        local oasisConstants = runtime.import(script, replicatedStorage:WaitForChild("TS"):WaitForChild("kit"):WaitForChild("oasis"):WaitForChild("oasis-constants"))
         if oasisConstants and oasisConstants.OasisBalance then
             MaxBuffStacks = oasisConstants.OasisBalance.MaxBuffStacks or 30
         end
@@ -27118,7 +27122,7 @@ run(function()
     local function getRemote()
         if remote then return remote end
         pcall(function()
-            remote = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("AttemptFireOasisProjectiles")
+            remote = replicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("AttemptFireOasisProjectiles")
         end)
         return remote
     end
@@ -27815,9 +27819,6 @@ run(function()
     local ColorSlider
 
     local cloneref = cloneref or function(obj) return obj end
-    local collectionService = cloneref(game:GetService('CollectionService'))
-    local runService        = cloneref(game:GetService('RunService'))
-    local playersService    = cloneref(game:GetService('Players'))
     local lplr              = playersService.LocalPlayer
 
     local vape      = shared.vape
@@ -28028,8 +28029,6 @@ run(function()
     local IgnoreTeammatesSpy
     local DisplayNameToggle
 
-    local runService     = game:GetService('RunService')
-    local playersService = game:GetService('Players')
     local lplr           = playersService.LocalPlayer
 
     local vape    = shared.vape
@@ -28071,7 +28070,7 @@ run(function()
     end
 
     local function setupLuciaSpy()
-        local util = require(game:GetService("ReplicatedStorage").TS.games.bedwars.kit.kits['piggy-bank']['piggy-bank-util']).PiggyBankUtil
+        local util = require(replicatedStorage.TS.games.bedwars.kit.kits['piggy-bank']['piggy-bank-util']).PiggyBankUtil
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("BasePart") and obj.Name == "pinata" then
                 if not isTeammateSpy(obj) then
@@ -29381,7 +29380,7 @@ run(function()
             local origin = character.PrimaryPart.Position
 
             pcall(function()
-                local n = game:GetService("ReplicatedStorage"):FindFirstChild("rbxts_include")
+                local n = replicatedStorage:FindFirstChild("rbxts_include")
                 if n then n = n:FindFirstChild("node_modules") end
                 if n then n = n:FindFirstChild("@rbxts") end
                 if n then n = n:FindFirstChild("net") end
@@ -29417,7 +29416,7 @@ run(function()
                         pcall(function()
                             character.Humanoid.JumpHeight = originalJumpHeight
                             if bedwars.JumpHeightController then
-                                bedwars.JumpHeightController:setJumpHeight(game:GetService("StarterPlayer").CharacterJumpHeight)
+                                bedwars.JumpHeightController:setJumpHeight(starterPlayer.CharacterJumpHeight)
                             end
                         end)
                     end
@@ -29606,7 +29605,7 @@ run(function()
 	local Blacklist
 	local Animations
 
-	local vim = cloneref(game:GetService("VirtualInputManager"))
+	local vim = VirtualInputManager
 
 	AutoMushroom = vape.Categories.World:CreateModule({
 		Name = 'AutoMushroom',
@@ -30137,7 +30136,7 @@ run(function()
 	local LegacyAnimation
 	
 	local function ensureAttribute()
-		local workspace = game:GetService("Workspace")
+		local workspace = workspace
 		
 		if workspace:GetAttribute("RbxLegacyAnimationBlending") == nil then
 			workspace:SetAttribute("RbxLegacyAnimationBlending", false)
@@ -30145,7 +30144,7 @@ run(function()
 	end
 	
 	local function setLegacyAnimation(enabled)
-		local workspace = game:GetService("Workspace")
+		local workspace = workspace
 		
 		ensureAttribute()
 		
@@ -32743,7 +32742,7 @@ run(function()
 end)
 
 run(function()
-	local UIS = game:GetService('UserInputService')
+	local UIS = inputService
 	local CustomCursor = {Enabled = false}
 	local mouseDropdown = {Value = 'Arrow'}
 	local mouseIcons = {
@@ -33605,9 +33604,11 @@ run(function()
 	local ChopModifier
 	local renderConnection
 
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
+	local Players = playersService
+	local RunService = runService
 	local LocalPlayer = Players.LocalPlayer
+
+	local UIS = inputService
 
 	local swordAnimationIds = {
 		["4947108314"] = true, ["10218627926"] = true,
