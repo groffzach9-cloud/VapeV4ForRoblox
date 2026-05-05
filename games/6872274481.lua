@@ -4684,6 +4684,8 @@ run(function()
     local inputConnections = {}
     local mobileJumpButtonConnection
     local mobileJumpButton
+    local mobileJumpHeld = false
+    local mobileJumpThread
 
     local function cleanupInfiniteJump()
         for _, conn in pairs(inputConnections) do
@@ -4699,6 +4701,8 @@ run(function()
         end
 
         mobileJumpButton = nil
+        mobileJumpHeld = false
+        mobileJumpThread = nil
     end
 
     local function performJump()
@@ -4707,9 +4711,31 @@ run(function()
         end
     end
 
+    local function mobileJumpLoop()
+        if mobileJumpThread then
+            return
+        end
+
+        mobileJumpThread = task.spawn(function()
+            while mobileJumpHeld do
+                performJump()
+                task.wait(0.05)
+            end
+            mobileJumpThread = nil
+        end)
+    end
+
     local function onMobileJumpButtonChanged()
-        if mobileJumpButton and mobileJumpButton.ImageRectOffset.X == 146 then
-            performJump()
+        if not mobileJumpButton then
+            return
+        end
+
+        local pressed = mobileJumpButton.ImageRectOffset.X == 146
+        if pressed then
+            mobileJumpHeld = true
+            mobileJumpLoop()
+        else
+            mobileJumpHeld = false
         end
     end
 
@@ -4733,6 +4759,7 @@ run(function()
                         mobileJumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
                         if mobileJumpButton then
                             mobileJumpButtonConnection = mobileJumpButton:GetPropertyChangedSignal('ImageRectOffset'):Connect(onMobileJumpButtonChanged)
+                            onMobileJumpButtonChanged()
                         end
                     end)
                 end
@@ -33513,7 +33540,7 @@ run(function()
 		end
 	end
 
-	KnockbackDisplace = vape.Categories.Combat:CreateModule({
+	KnockbackDisplace = vape.Categories.Blatent:CreateModule({
 		Name = 'KnockbackDisplace',
 		Function = function(callback)
 			if callback then
@@ -33651,7 +33678,7 @@ run(function()
 		)
 	end
 
-	AnimChopper = vape.Categories.Combat:CreateModule({
+	AnimChopper = vape.Categories.Utility:CreateModule({
 		Name = 'AnimChopper',
 		Function = function(callback)
 			if callback then
