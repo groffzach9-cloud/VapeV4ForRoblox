@@ -4678,8 +4678,71 @@ run(function()
         end
     })
 end)
-	
+
 run(function()
+    local InfiniteJump
+    local inputConnections = {}
+    local mobileJumpButtonConnection
+    local mobileJumpButton
+
+    local function cleanupInfiniteJump()
+        for _, conn in pairs(inputConnections) do
+            if conn and typeof(conn) == 'RBXScriptConnection' then
+                pcall(conn.Disconnect, conn)
+            end
+        end
+        inputConnections = {}
+
+        if mobileJumpButtonConnection then
+            pcall(mobileJumpButtonConnection.Disconnect, mobileJumpButtonConnection)
+            mobileJumpButtonConnection = nil
+        end
+
+        mobileJumpButton = nil
+    end
+
+    local function performJump()
+        if entitylib.isAlive and entitylib.character and entitylib.character.Humanoid then
+            entitylib.character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+
+    local function onMobileJumpButtonChanged()
+        if mobileJumpButton and mobileJumpButton.ImageRectOffset.X == 146 then
+            performJump()
+        end
+    end
+
+    InfiniteJump = vape.Categories.Blatant:CreateModule({
+        Name = 'Inf Jump',
+        Function = function(callback)
+            if callback then
+                table.insert(inputConnections, inputService.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed or inputService:GetFocusedTextBox() then
+                        return
+                    end
+                    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Space then
+                        performJump()
+                    elseif input.UserInputType == Enum.UserInputType.Gamepad1 and input.KeyCode == Enum.KeyCode.ButtonA then
+                        performJump()
+                    end
+                end))
+
+                if inputService.TouchEnabled then
+                    pcall(function()
+                        mobileJumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
+                        if mobileJumpButton then
+                            mobileJumpButtonConnection = mobileJumpButton:GetPropertyChangedSignal('ImageRectOffset'):Connect(onMobileJumpButtonChanged)
+                        end
+                    end)
+                end
+            else
+                cleanupInfiniteJump()
+            end
+        end,
+        Tooltip = 'Allows infinite jumping on PC and mobile'
+    })
+
     local Mode
     local Expand
     local AutoToggle
