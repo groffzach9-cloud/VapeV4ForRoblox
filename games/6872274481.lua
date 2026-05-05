@@ -34029,3 +34029,89 @@ run(function()
 		end
 	})
 end)
+run(function()
+local Sky
+
+Sky = GhostVape.Categories.World:CreateModule({
+     Name = "AestheticLightingV2",
+     Function = function(callback) 
+        if callback then
+             local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local Bloom = Instance.new("BloomEffect")
+local Blur = Instance.new("BlurEffect")
+local ColorCor = Instance.new("ColorCorrectionEffect")
+local SunRays = Instance.new("SunRaysEffect")
+local Sky = Instance.new("Sky")
+local Atm = Instance.new("Atmosphere")
+
+
+for i, v in pairs(Lighting:GetChildren()) do
+	if v then
+		v:Destroy()
+	end
+end
+
+Bloom.Parent = Lighting
+Blur.Parent = Lighting
+ColorCor.Parent = Lighting
+SunRays.Parent = Lighting
+Sky.Parent = Lighting
+Atm.Parent = Lighting
+
+if Vignette == true then
+	local Gui = Instance.new("ScreenGui")
+	Gui.Parent = StarterGui
+	Gui.IgnoreGuiInset = true
+	
+	local ShadowFrame = Instance.new("ImageLabel")
+	ShadowFrame.Parent = Gui
+	ShadowFrame.AnchorPoint = Vector2.new(0.5,1)
+	ShadowFrame.Position = UDim2.new(0.5,0,1,0)
+	ShadowFrame.Size = UDim2.new(1,0,1.05,0)
+	ShadowFrame.BackgroundTransparency = 1
+	ShadowFrame.Image = "rbxassetid://4576475446"
+	ShadowFrame.ImageTransparency = 0.3
+	ShadowFrame.ZIndex = 10
+end
+
+Bloom.Intensity = 1
+Bloom.Size = 2
+Bloom.Threshold = 2
+
+Blur.Size = 0
+
+ColorCor.Brightness = 0.1
+ColorCor.Contrast = 0
+ColorCor.Saturation = -0.3
+ColorCor.TintColor = Color3.fromRGB(107, 78, 173)
+
+SunRays.Intensity = 0.03
+SunRays.Spread = 0.727
+
+Sky.SkyboxBk = "http://www.roblox.com/asset/?id=8139677359"
+Sky.SkyboxDn = "http://www.roblox.com/asset/?id=8139677253"
+Sky.SkyboxFt = "http://www.roblox.com/asset/?id=8139677111"
+Sky.SkyboxLf = "http://www.roblox.com/asset/?id=8139676988"
+Sky.SkyboxRt = "http://www.roblox.com/asset/?id=8139676842"
+Sky.SkyboxUp = "http://www.roblox.com/asset/?id=8139676647"
+Sky.SunAngularSize = 10
+
+Lighting.Ambient = Color3.fromRGB(128,128,128)
+Lighting.Brightness = 2
+Lighting.ColorShift_Bottom = Color3.fromRGB(0,0,0)
+Lighting.ColorShift_Top = Color3.fromRGB(0,0,0)
+Lighting.EnvironmentDiffuseScale = 0.2
+Lighting.EnvironmentSpecularScale = 0.2
+Lighting.GlobalShadows = false
+Lighting.OutdoorAmbient = Color3.fromRGB(0,0,0)
+Lighting.ShadowSoftness = 0.2
+Lighting.ClockTime = 14
+Lighting.GeographicLatitude = 45
+Lighting.ExposureCompensation = 0.5
+
+         end
+      end,
+    Tooltip = "AestheticLightingV2"
+    })
+end)
