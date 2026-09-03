@@ -2578,7 +2578,10 @@ run(function()
 
                         if toolType == 'block' and blockPlacer then
                             task.spawn(function()
-                                blockPlacer:autoBridge(workspace:GetServerTimeNow() - bedwars.KnockbackController:getLastKnockbackTime() >= 0.2)
+								local mouseinfo = blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
+								if mouseinfo and mouseinfo.placementPosition == mouseinfo.placementPosition then
+									blockPlacer:placeBlock(mouseinfo.placementPosition)
+								end
                             end)
                         elseif toolType == 'sword' then
                             bedwars.SwordController:swingSwordAtMouse(0.39)
